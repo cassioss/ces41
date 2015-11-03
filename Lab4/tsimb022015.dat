@@ -1,0 +1,25 @@
+program MenorMaior
+
+local {
+	int i, n, num, menor, maior;
+}
+
+statements {
+	read (n, i, menor);
+	i = 1;
+	while i <= n do {
+		read (num);
+		if i == 1 then {
+			menor = num;
+			maior = num;
+		}
+		else {
+			if num > maior then maior = num;
+			if num < menor then menor = num;
+		}
+		i = i + 1;
+	}
+	write ("Maior = ", maior, "\nMenor = ", menor);
+    if i+3 then i = i-5;
+    while i * 5 do i = i / 4;
+}
