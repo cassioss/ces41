@@ -27,6 +27,9 @@ int tab = 0;
 
 #define     IDPROG      1
 #define     IDVAR       2
+#define     IDGLOB      3       // NOTE is really necessary?
+#define     IDFUNC      4
+#define     IDPROC      5
 
 /*  Definicao dos tipos de variaveis   */
 
@@ -45,7 +48,7 @@ int tab = 0;
 
 /*  Strings para nomes dos tipos de identificadores  */
 
-char *nometipid[3] = {" ", "IDPROG", "IDVAR"};
+char *nometipid[3] = {" ", "IDPROG", "IDVAR", "IDGLOB", "IDFUNC", "IDPROC"};
 
 /*  Strings para nomes dos tipos de variaveis  */
 
@@ -132,7 +135,7 @@ void NaoEsperado(char*);
 
 %type       <simb>          Variable
 %type       <tipoexpr>      Expression  AuxExpr1  AuxExpr2
-                            AuxExpr3   AuxExpr4   Term   Factor
+                            AuxExpr3   AuxExpr4   Term   Factor   FuncCall
 %type       <nsubscr>       SubscrList
 %token  <string>    ID
 %token  <valor>     INTCT
@@ -294,7 +297,7 @@ ElseStat	:   /* Empty */
             |	ELSE        {tabular(); printf ("else ");}
                 Statement
             ;
-WhileStat   :	WHILE       {printf ("while ");}
+WhileStat   :	WHILE       {printf ("while ");} // TODO test type of expression
                 Expression
                 DO          {printf (" do ");}
                 Statement
@@ -521,8 +524,9 @@ FuncCall    :   ID  {
                     printf ("%s", $1);
                     simb = ProcuraSimb ($1);
                     if (simb == NULL) NaoDeclarado ($1);
-                    else if (simb->tid != IDVAR) TipoInadequado ($1);
-		}
+                    else if (simb->tid != IDFUNC) TipoInadequado ($1);
+                    $$ = $1->tvar;
+		        }
                 OPPAR       {printf ("\(");}
                 FuncTerm
             ;
