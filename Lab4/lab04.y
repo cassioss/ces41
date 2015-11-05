@@ -199,16 +199,23 @@ ElemList    :	Elem
                 COMMA   {printf (", "); }
                 Elem
             ;
-Elem        :	ID      {printf ("%s", $1); }
-            |	ID      {printf ("%s", $1); }
-                OPBRAK  {printf ("["); }
-                DimList
-                CLBRAK  {printf ("]"); }
+Elem        :   ID  { printf ("%s ", $1);
+                    if  (ProcuraSimb ($1)  !=  NULL) DeclaracaoRepetida ($1);
+                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente);
+                            simb->array = FALSO; }
+                }
+            |   ID   OPBRAK  { printf ("%s [ ", $1);
+                    if  (ProcuraSimb ($1)  !=  NULL) DeclaracaoRepetida ($1);
+                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente);
+                            simb->array = VERDADE; simb->ndims = 0; }
+                }  DimList  CLBRAK  {printf ("] ");}
             ;
-DimList	    : 	INTCT   {printf ("%d", $1);}
-            |	DimList
-                COMMA   {printf (", "); }
-                INTCT   {printf ("%d", $4);}
+DimList     :  INTCT   { printf ("%d ", $1);
+                    if ($1 <= 0) Esperado ("Valor inteiro positivo");
+                    simb->ndims++; simb->dims[simb->ndims] = $1;}
+            |  DimList   COMMA   INTCT   { printf (", %d ", $3);
+                    if ($3 <= 0) Esperado ("Valor inteiro positivo");
+                    simb->ndims++; simb->dims[simb->ndims] = $3;}
             ;
 ModList	    :   /* Empty */
             |	ModList     Module
@@ -443,28 +450,43 @@ Factor		:	Variable  {
                 {printf (") "); $$ = $3;}
             |	FuncCall
             ;
-Variable	:   ID  {  //NOTE refactor (Shift-reduce)
+Variable    :   ID  {
                     printf ("%s ", $1);
                     simb = ProcuraSimb ($1);
-                    if (simb == NULL)   NaoDeclarado ($1);
-                    else if (simb->tid != IDVAR)   
-                        TipoInadequado ($1);
+                    if (simb == NULL) NaoDeclarado ($1);
+                    else if (simb->tid != IDVAR) TipoInadequado ($1);
                     $$ = simb;
-               }
-            |	ID  {
-                    printf ("%s ", $1);
+                    if ($$ != NULL)
+                        if ($$->array == VERDADE)
+                            Esperado ("Subscrito\(s)");
+
+                }
+            |   ID  OPBRAK  {
+                    printf ("%s [ ", $1);
                     simb = ProcuraSimb ($1);
-                    if (simb == NULL)   NaoDeclarado ($1);
-                    else if (simb->tid != IDVAR)   
-                        TipoInadequado ($1);
-                    $$ = simb;
-               }
-                OPBRAK      {printf ("["); }
-                SubscrList  // TODO analise semantica
-                CLBRAK      {printf ("]"); }
+                    if (simb == NULL) NaoDeclarado ($1);
+                    else if (simb->tid != IDVAR) TipoInadequado ($1);
+                    $<simb>$ = simb;
+            }  SubscrList  CLBRAK  {
+                    printf ("] "); $$ = $<simb>3;
+                    if ($$ != NULL)
+                        if ($$->array == FALSO)
+                            NaoEsperado ("Subscrito\(s)");
+                        else if ($$->ndims != $4)
+                            Incompatibilidade 
+                        ("Numero de subscritos incompativel com declaracao");
+                    }
             ;
-SubscrList  :   AuxExpr4
-            |	SubscrList  COMMA  {printf (",");}  AuxExpr4
+SubscrList:     AuxExpr4    {
+                    if ($1 != INTEIRO && $1 != CARACTERE)
+                        Incompatibilidade ("Tipo inadequado para subscrito");
+                    $$ = 1;
+                }
+            |  SubscrList   COMMA  {printf (", ");}   AuxExpr4  {
+                if ($4 != INTEIRO && $4 != CARACTERE)
+                    Incompatibilidade ("Tipo inadequado para subscrito");
+                $$ = $1 + 1;
+               }
             ;
 FuncCall    :   ID          {printf ("%s", $1); }
                 OPPAR       {printf ("\(");}
