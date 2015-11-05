@@ -525,7 +525,7 @@ FuncCall    :   ID  {
                     simb = ProcuraSimb ($1);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDFUNC) TipoInadequado ($1);
-                    $$ = $1->tvar;
+                    $$ = simb->tvar;
 		        }
                 OPPAR       {printf ("\(");}
                 FuncTerm
