@@ -377,34 +377,63 @@ ExprList	:	Expression
                 COMMA                   {printf (", "); }
                 Expression
             ;
-Expression  :	AuxExpr1
-            |	Expression
-                OR  {printf (" or "); }  AuxExpr1
+Expression  :   AuxExpr1
+            |   Expression  OR  {printf ("|| ");}   AuxExpr1  {
+                    if ($1 != LOGICO || $4 != LOGICO)
+                        Incompatibilidade ("Operando improprio para operador or");
+                    $$ = LOGICO;
+                }
             ;
-AuxExpr1    :	AuxExpr2
-            |	AuxExpr1
-                AND  {printf (" and "); } AuxExpr2
+AuxExpr1    :   AuxExpr2
+            |   AuxExpr1  AND  {printf ("&& ");}  AuxExpr2  {
+                    if ($1 != LOGICO || $4 != LOGICO)
+                        Incompatibilidade ("Operando improprio para operador and");
+                    $$ = LOGICO;
+                }
             ;
-AuxExpr2    :	AuxExpr3
-            |	NOT  {printf ("!"); } AuxExpr3
+AuxExpr2    :   AuxExpr3
+            |   NOT  {printf ("! ");}  AuxExpr3  {
+                    if ($3 != LOGICO)
+                        Incompatibilidade ("Operando improprio para operador not");
+                    $$ = LOGICO;
+                }
             ;
-AuxExpr3    :	AuxExpr4
-            |	AuxExpr4  RELOP {
-                    switch($2){
-                        case LT:    printf(" < ");  break;
-                        case LE:    printf(" <= "); break;
-                        case GT:    printf(" > ");  break;
-                        case GE:    printf(" >= "); break;
-                        case EQ:    printf(" == "); break;
-                        case NE:    printf(" != "); break;
+AuxExpr3    :   AuxExpr4
+            |   AuxExpr4  RELOP  {
+                    switch ($2) {
+                        case LT: printf ("< "); break;
+                        case LE: printf ("<= "); break;
+                        case EQ: printf ("== "); break;
+                        case NE: printf ("!= "); break;
+                        case GT: printf ("> "); break;
+                        case GE: printf (">= "); break;
                     }
-                }   AuxExpr4
+                }  AuxExpr4  {
+                    switch ($2) {
+                        case LT: case LE: case GT: case GE:
+                            if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4 != REAL && $4 != CARACTERE)
+                                Incompatibilidade   ("Operando improprio para operador relacional");
+                            break;
+                        case EQ: case NE:
+                            if (($1 == LOGICO || $4 == LOGICO) && $1 != $4)
+                                Incompatibilidade ("Operando improprio para operador relacional");
+                            break;
+                    }
+                    $$ = LOGICO;
+                }
             ;
-AuxExpr4    :	Term
-            |	AuxExpr4  ADOP {
-                    if ($2 == PLUS) printf (" + ");
-                    else            printf (" - ");
-                }  Term
+AuxExpr4    :   Term
+            |   AuxExpr4  ADOP  {
+                    switch ($2) {
+                        case MAIS: printf ("+ "); break;
+                        case MENOS: printf ("- "); break;
+                    }
+                }  Term  {
+                        if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4!=REAL && $4!=CARACTERE)
+                            Incompatibilidade ("Operando improprio para operador aritmetico");
+                        if ($1 == REAL || $4 == REAL) $$ = REAL;
+                        else $$ = INTEIRO;
+                }
             ;
 Term        :   Factor
             |   Term  MULTOP   {
