@@ -1,8 +1,11 @@
 %{
+/* Inclusao de arquivos da biblioteca de C */
 
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <string.h>
+
+/* Definicao dos atributos dos atomos operadores */
 
 #define     LT      1
 #define     LE      2
@@ -20,14 +23,85 @@
 
 int tab = 0;
 
+/*   Definicao dos tipos de identificadores   */
+
+#define     IDPROG      1
+#define     IDVAR       2
+
+/*  Definicao dos tipos de variaveis   */
+
+#define     NAOVAR      0
+#define     INTEIRO     1
+#define     LOGICO      2
+#define     REAL        3
+#define     CARACTERE   4
+
+/*   Definicao de outras constantes   */
+
+#define NCLASSHASH  23
+#define VERDADE     1
+#define FALSO       0
+#define MAXDIMS     10
+
+/*  Strings para nomes dos tipos de identificadores  */
+
+char *nometipid[3] = {" ", "IDPROG", "IDVAR"};
+
+/*  Strings para nomes dos tipos de variaveis  */
+
+char *nometipvar[5] = {"NAOVAR",
+    "INTEIRO", "LOGICO", "REAL", "CARACTERE"
+};
+
+/*    Declaracoes para a tabela de simbolos     */
+
+typedef struct celsimb celsimb;
+typedef celsimb *simbolo;
+struct celsimb {
+    char *cadeia;
+    int tid, tvar, ndims, dims[MAXDIMS+1];
+    char inic, ref, array;
+    simbolo prox;
+};
+
+/*  Variaveis globais para a tabela de simbolos e analise semantica */
+
+simbolo tabsimb[NCLASSHASH];
+simbolo simb;
+int tipocorrente;
+
+/*
+    Prototipos das funcoes para a tabela de simbolos e analise semantica
+ */
+
+void InicTabSimb (void);
+void ImprimeTabSimb (void);
+simbolo InsereSimb (char *, int, int);
+int hash (char *);
+simbolo ProcuraSimb (char *);
+void DeclaracaoRepetida (char *);
+void TipoInadequado (char *);
+void NaoDeclarado (char *);
+void VerificaInicRef (void);
+void Incompatibilidade (char *);
+void Esperado(char*);
+void NaoEsperado(char*);
+
 %}
+
+/* Definicao do tipo de yylval e dos atributos dos nao terminais */
 
 %union {
     char string[50];
     int atr, valor;
     float valreal;
     char carac;
+    simbolo simb;
+    int tipoexpr;
+    int nsubscr;    
 }
+
+/* Declaracao dos atributos dos tokens e dos nao-terminais */
 
 %token  CALL
 %token  CHAR
@@ -56,10 +130,14 @@ int tab = 0;
 %token  WHILE
 %token  WRITE
 
+%type       <simb>          Variable
+%type       <tipoexpr>      Expression  AuxExpr1  AuxExpr2
+                            AuxExpr3   AuxExpr4   Term   Factor
+%type       <nsubscr>       SubscrList
 %token  <string>    ID
 %token  <valor>     INTCT
 %token  <valreal>   FLOATCT
-%token  <string>    CHARCT
+%token  <carac>    CHARCT
 %token  <string>    STRING
 
 %token  OR
@@ -77,15 +155,20 @@ int tab = 0;
 %token  CLBRAK
 %token  OPBRACE
 %token  CLBRACE
+
 %token  OPTRIP
 %token  CLTRIP
 %token  SCOLON
 %token  COMMA
 %token  ASSIGN
 
-%token  INVAL
+%token  <carac>     INVAL
 
 %%
+/* Producoes da gramatica:
+
+    Os terminais sao escritos e, depois de alguns,
+    para alguma estetica, ha mudanca de linha       */
 
 Prog        :	PROGRAM     {printf ("program ");}
                 ID          {printf ("%s ", $3); }
@@ -259,7 +342,7 @@ CallStat    :   CALL        {printf ("call ");}
 CallCompl   :   ExprList    CallFinish
             |   CallFinish
             ;
-CallFinish  :   CLPAR       {printf (")"); }
+CallFinish  :   CLPAR       {printf (")");}
                 SCOLON      {printf (";\n");}
             ;
 ReturnStat  :	RETURN      {printf ("return");}
@@ -268,8 +351,19 @@ ReturnStat  :	RETURN      {printf ("return");}
                 Expression
                 SCOLON      {printf(";\n");}
             ;
-AssignStat  :	Variable    ASSIGN      {printf (" = "); }
-                Expression  SCOLON      {printf (";\n");}
+AssignStat  :   Variable  {
+                    if  ($1 != NULL) $1->inic = $1->ref = VERDADE;
+                }
+                ASSIGN  {printf ("= ");}  Expression
+                SCOLON  {
+                    printf (";\n");
+                    if ($1 != NULL)
+                        if ((($1->tvar == INTEIRO || $1->tvar == CARACTERE) &&
+                            ($5 == REAL || $5 == LOGICO)) ||
+                            ($1->tvar == REAL && $5 == LOGICO) ||
+                            ($1->tvar == LOGICO && $5 != LOGICO))
+                            Incompatibilidade ("Lado direito de comando de atribuicao improprio");
+                }
             ;
 ExprList	:	Expression
             |	ExprList
@@ -305,30 +399,68 @@ AuxExpr4    :	Term
                     else            printf (" - ");
                 }  Term
             ;
-Term  	    :   Factor
-            |	Term
-                MULTOP  {
-                    if ($2 == TIMES)        printf ("*");
-                    else if ($2 == DIVIDE)  printf ("/");
-                    else if ($2 == MODULE)  printf ("%");
-                }   Factor
+Term        :   Factor
+            |   Term  MULTOP   {
+                    switch ($2) {
+                        case TIMES: printf ("* "); break;
+                        case DIVIDE: printf ("/ "); break;
+                        case MODULE: printf ("%% "); break;
+                    }
+                }  Factor  {
+                    switch ($2) {
+                        case TIMES: case DIVIDE:
+                            if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4!=REAL && $4!=CARACTERE)
+                                Incompatibilidade ("Operando improprio para operador aritmetico");
+                            if ($1 == REAL || $4 == REAL) $$ = REAL;
+                            else $$ = INTEIRO;
+                            break;
+                        case MODULE:
+                            if ($1 != INTEIRO && $1 != CARACTERE  ||  $4 != INTEIRO && $4 != CARACTERE)
+                                Incompatibilidade ("Operando improprio para operador resto");
+                            $$ = INTEIRO;
+                            break;
+                    }
+                }
             ;
-Factor		:	Variable
-            |	INTCT               {printf ("%d", $1);}
-            |	FLOATCT             {printf ("%g", $1);}
-            |	CHARCT              {printf ("%s", $1);}
-            |   TRUE                {printf ("true");}
-            |	FALSE               {printf ("false");}
-            |	NEG                 {printf ("~");}
-                Factor
-            |   OPPAR               {printf ("\(");}
-                Expression  CLPAR   {printf (")"); }
+Factor		:	Variable  {
+                    if  ($1 != NULL)  {
+                        $1->ref  =  VERDADE;
+                        $$ = $1->tvar;
+                    }
+                }
+            |   INTCT  {printf ("%d ", $1); $$ = INTEIRO;}
+            |   FLOATCT  {printf ("%g ", $1); $$ = REAL;}
+            |   CHARCT  {printf ("\'%c\' ", $1); $$ = CARACTERE;}
+            |   TRUE  {printf ("true "); $$ = LOGICO;}
+            |   FALSE  {printf ("false "); $$ = LOGICO;}
+            |   NEG  {printf ("~ ");}  Factor {
+                    if ($3 != INTEIRO && $3 != REAL && $3 != CARACTERE)
+                        Incompatibilidade  ("Operando improprio para menos unario");
+                    if ($3 == REAL) $$ = REAL;
+                    else $$ = INTEIRO;
+                }
+            |   OPPAR   {printf ("( ");}  Expression  CLPAR
+                {printf (") "); $$ = $3;}
             |	FuncCall
             ;
-Variable	:   ID          {printf ("%s", $1); }
-            |	ID          {printf ("%s", $1); }
+Variable	:   ID  {  //NOTE refactor (Shift-reduce)
+                    printf ("%s ", $1);
+                    simb = ProcuraSimb ($1);
+                    if (simb == NULL)   NaoDeclarado ($1);
+                    else if (simb->tid != IDVAR)   
+                        TipoInadequado ($1);
+                    $$ = simb;
+               }
+            |	ID  {
+                    printf ("%s ", $1);
+                    simb = ProcuraSimb ($1);
+                    if (simb == NULL)   NaoDeclarado ($1);
+                    else if (simb->tid != IDVAR)   
+                        TipoInadequado ($1);
+                    $$ = simb;
+               }
                 OPBRAK      {printf ("["); }
-                SubscrList
+                SubscrList  // TODO analise semantica
                 CLBRAK      {printf ("]"); }
             ;
 SubscrList  :   AuxExpr4
@@ -343,10 +475,129 @@ FuncTerm    :   CLPAR                   {printf (")"); }
             ;
 %%
 
+/* Inclusao do analisador lexico  */
+
 #include "lex.yy.c"
 
 tabular () {
     int i;
     for (i = 1; i <= tab; i++)
         printf ("\t");
+}
+
+/*  InicTabSimb: Inicializa a tabela de simbolos   */
+
+void InicTabSimb () {
+    int i;
+    for (i = 0; i < NCLASSHASH; i++)
+        tabsimb[i] = NULL;
+}
+
+/*
+    ProcuraSimb (cadeia): Procura cadeia na tabela de simbolos;
+    Caso ela ali esteja, retorna um ponteiro para sua celula;
+    Caso contrario, retorna NULL.
+ */
+
+simbolo ProcuraSimb (char *cadeia) {
+    simbolo s; int i;
+    i = hash (cadeia);
+    for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia);
+        s = s->prox);
+    return s;
+}
+
+/*
+    InsereSimb (cadeia, tid, tvar): Insere cadeia na tabela de
+    simbolos, com tid como tipo de identificador e com tvar como
+    tipo de variavel; Retorna um ponteiro para a celula inserida
+ */
+
+simbolo InsereSimb (char *cadeia, int tid, int tvar) {
+    int i; simbolo aux, s;
+    i = hash (cadeia); aux = tabsimb[i];
+    s = tabsimb[i] = (simbolo) malloc (sizeof (celsimb));
+    s->cadeia = (char*) malloc ((strlen(cadeia)+1) * sizeof(char));
+    strcpy (s->cadeia, cadeia);
+    s->tid = tid;       s->tvar = tvar;
+    s->inic = FALSO;    s->ref = FALSO;
+    s->prox = aux;  return s;
+}
+
+/*
+    hash (cadeia): funcao que determina e retorna a classe
+    de cadeia na tabela de simbolos implementada por hashing
+ */
+
+int hash (char *cadeia) {
+    int i, h;
+    for (h = i = 0; cadeia[i]; i++) {h += cadeia[i];}
+    h = h % NCLASSHASH;
+    return h;
+}
+
+/* ImprimeTabSimb: Imprime todo o conteudo da tabela de simbolos  */
+
+void ImprimeTabSimb () {
+    int i; simbolo s;
+    printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
+    for (i = 0; i < NCLASSHASH; i++)
+        if (tabsimb[i]) {
+            printf ("Classe %d:\n", i);
+            for (s = tabsimb[i]; s!=NULL; s = s->prox){
+                printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
+                if (s->tid == IDVAR){
+                    printf (", %s, %d, %d",
+                        nometipvar[s->tvar], s->inic, s->ref);
+                    if (s->array == VERDADE) {
+                        int j;
+                        printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
+                        for (j = 1; j <= s->ndims; j++)
+                            printf ("  %d", s->dims[j]);
+                    }
+                }
+                printf(")\n");
+            }
+        }
+}
+
+/*  Mensagens de erros semanticos  */
+
+void DeclaracaoRepetida (char *s) {
+    printf ("\n\n***** Declaracao Repetida: %s *****\n\n", s);
+}
+
+void NaoDeclarado (char *s) {
+    printf ("\n\n***** Identificador Nao Declarado: %s *****\n\n", s);
+}
+
+void TipoInadequado (char *s) {
+    printf ("\n\n***** Identificador de Tipo Inadequado: %s *****\n\n", s);
+}
+
+void Incompatibilidade (char *s) {
+    printf ("\n\n***** Incompatibilidade: %s *****\n\n", s);
+}
+
+void VerificaInicRef () {
+    int i; simbolo s;
+
+    printf ("\n");
+    for (i = 0; i < NCLASSHASH; i++)
+        if (tabsimb[i])
+            for (s = tabsimb[i]; s!=NULL; s = s->prox)
+                if (s->tid == IDVAR) {
+                    if (s->inic == FALSO)
+                        printf ("%s: Nao Inicializada\n", s->cadeia);
+                    if (s->ref == FALSO)
+                        printf ("%s: Nao Referenciada\n", s->cadeia);
+                }
+}
+
+void Esperado (char *s) {
+    printf ("\n\n***** Esperado: %s *****\n\n", s);
+}
+
+void NaoEsperado (char *s) {
+    printf ("\n\n***** Nao Esperado: %s *****\n\n", s);
 }
