@@ -25,11 +25,11 @@ int tab = 0;
 
 /*   Definicao dos tipos de identificadores   */
 
-#define     IDPROG      1
+#define     IDGLOB      1
 #define     IDVAR       2
-#define     IDGLOB      3       // NOTE is really necessary?
-#define     IDFUNC      4
-#define     IDPROC      5
+#define     IDFUNC      3
+#define     IDPROC      4
+#define     IDPROG      5
 
 /*  Definicao dos tipos de variaveis   */
 
@@ -62,16 +62,27 @@ typedef struct celsimb celsimb;
 typedef celsimb *simbolo;
 struct celsimb {
     char *cadeia;
-    int tid, tvar, ndims, dims[MAXDIMS+1];
-    char inic, ref, array;
-    simbolo prox;
+    int tid, tvar, tparam, ndims, dims[MAXDIMS+1];
+    char inic, ref, array, parametro;
+    listsimb listvar, listparam, listfunc;
+    simbolo escopo, prox;
 };
+
+/* Listas de simbolos*/
+typedef struct elemlistsimb elemlistsimb;
+typedef elemlistsimb *pontelemlistsimb;
+typedef elemlistsimb *listsimb;
+struct elemlistsimb {
+    simbolo simb;
+    pontelemlistsimb prox;
+}
 
 /*  Variaveis globais para a tabela de simbolos e analise semantica */
 
 simbolo tabsimb[NCLASSHASH];
 simbolo simb;
 int tipocorrente;
+simbolo escopo = NULL;
 
 /*
     Prototipos das funcoes para a tabela de simbolos e analise semantica
@@ -81,7 +92,7 @@ void InicTabSimb (void);
 void ImprimeTabSimb (void);
 simbolo InsereSimb (char *, int, int);
 int hash (char *);
-simbolo ProcuraSimb (char *);
+simbolo ProcuraSimb (char *); // NOTE what about escopo?
 void DeclaracaoRepetida (char *);
 void TipoInadequado (char *);
 void NaoDeclarado (char *);
@@ -175,7 +186,7 @@ void NaoEsperado(char*);
 
 Prog        :	PROGRAM     {printf ("program ");}
                 ID          {printf ("%s ", $3); }
-                OPTRIP      {printf ("{{{\n\n");}
+                OPTRIP      {printf ("{{{\n\n"); escopo = InsereSimb (“##global”, IDGLOB, NAOVAR, NULL);}
                 GlobDecls
                 ModList
                 MainMod
@@ -230,7 +241,7 @@ ModHeader   :   FuncHeader
             ;
 FuncHeader	:   Type
                 FUNCTION    {printf ("function ");}
-                ID          {printf ("%s ", $4);}
+                ID          {printf ("%s ", $4); escopo = InsereSimb ($4, IDFUNC, tipocorrente, escopo);}
                 OPPAR       {printf ("\(");}
                 FuncHd
             ;
