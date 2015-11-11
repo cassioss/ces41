@@ -190,7 +190,7 @@ void InsereListSimb(simbolo, listsimb);
 
 Prog        :	PROGRAM     {printf ("program ");}
                 ID          {printf ("%s ", $3); }
-                OPTRIP      {printf ("{{{\n\n"); escopo = InsereSimb (“00global”, IDGLOB, NAOVAR, NULL);} // NOTE 00 instead of ##
+                OPTRIP      {printf ("{{{\n\n"); escopo = InsereSimb ("##global", IDGLOB, NAOVAR, NULL);}
                 GlobDecls
                 ModList
                 MainMod
@@ -218,13 +218,13 @@ ElemList    :	Elem
                 Elem
             ;
 Elem        :   ID  { printf ("%s ", $1);
-                    if  (ProcuraSimb ($1)  !=  NULL) DeclaracaoRepetida ($1);
-                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente);
+                    if  (ProcuraSimb ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
+                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
                             simb->array = FALSO; }
                 }
             |   ID   OPBRAK  { printf ("%s [ ", $1);
-                    if  (ProcuraSimb ($1)  !=  NULL) DeclaracaoRepetida ($1);
-                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente);
+                    if  (ProcuraSimb ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
+                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
                             simb->array = VERDADE; simb->ndims = 0; }
                 }  DimList  CLBRAK  {printf ("] ");}
             ;
@@ -502,7 +502,7 @@ Variable    :   ID  {       // NOTE redundancia de printf
                     escaux = escopo;
                     simb = ProcuraSimb ($1, escaux);
                     while (escaux && !simb) {
-                        escaux = escaux->escopo
+                        escaux = escaux->escopo;
                         if (escaux)
                         simb = ProcuraSimb ($1, escaux);
                     }
@@ -519,7 +519,7 @@ Variable    :   ID  {       // NOTE redundancia de printf
                     escaux = escopo;
                     simb = ProcuraSimb ($1, escaux);
                     while (escaux && !simb) {
-                        escaux = escaux->escopo
+                        escaux = escaux->escopo;
                         if (escaux)
                         simb = ProcuraSimb ($1, escaux);
                     }
@@ -549,7 +549,7 @@ SubscrList:     AuxExpr4    {
             ;
 FuncCall    :   ID  {
                     printf ("%s", $1);
-                    simb = ProcuraSimb ($1);
+                    simb = ProcuraSimb ($1, escopo);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDFUNC) TipoInadequado ($1);
                     $$ = simb->tvar;
