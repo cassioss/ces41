@@ -484,7 +484,13 @@ Factor		:	Variable  {
             ;
 Variable    :   ID  {       // NOTE redundancia de printf
                     printf ("%s ", $1);
-                    simb = ProcuraSimb ($1);
+                    escaux = escopo;
+                    simb = ProcuraSimb ($1, escaux);
+                    while (escaux && !simb) {
+                        escaux = escaux->escopo
+                        if (escaux)
+                        simb = ProcuraSimb ($1, escaux);
+                    }
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDVAR) TipoInadequado ($1);
                     $$ = simb;
