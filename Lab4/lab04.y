@@ -85,6 +85,7 @@ simbolo tabsimb[NCLASSHASH];
 simbolo simb;
 int tipocorrente;
 simbolo escopo = NULL;
+simbolo escaux = NULL;
 
 /*
     Prototipos das funcoes para a tabela de simbolos e analise semantica
@@ -92,9 +93,9 @@ simbolo escopo = NULL;
 
 void InicTabSimb (void);
 void ImprimeTabSimb (void);
-simbolo InsereSimb (char *, int, int);
+simbolo InsereSimb (char *, int, int, simbolo);
 int hash (char *);
-simbolo ProcuraSimb (char *); // NOTE what about escopo?
+simbolo ProcuraSimb (char *, simbolo); // NOTE what about escopo?
 void DeclaracaoRepetida (char *);
 void TipoInadequado (char *);
 void NaoDeclarado (char *);
@@ -189,7 +190,7 @@ void InsereListSimb(simbolo, listsimb);
 
 Prog        :	PROGRAM     {printf ("program ");}
                 ID          {printf ("%s ", $3); }
-                OPTRIP      {printf ("{{{\n\n"); escopo = InsereSimb (“##global”, IDGLOB, NAOVAR, NULL);}
+                OPTRIP      {printf ("{{{\n\n"); escopo = InsereSimb (“00global”, IDGLOB, NAOVAR, NULL);} // NOTE 00 instead of ##
                 GlobDecls
                 ModList
                 MainMod
@@ -442,8 +443,8 @@ AuxExpr3    :   AuxExpr4
 AuxExpr4    :   Term
             |   AuxExpr4  ADOP  {
                     switch ($2) {
-                        case MAIS: printf ("+ "); break;
-                        case MENOS: printf ("- "); break;
+                        case PLUS: printf ("+ "); break;
+                        case MINUS: printf ("- "); break;
                     }
                 }  Term  {
                         if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4!=REAL && $4!=CARACTERE)
