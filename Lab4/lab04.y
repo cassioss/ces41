@@ -48,7 +48,7 @@ int tab = 0;
 
 /*  Strings para nomes dos tipos de identificadores  */
 
-char *nometipid[3] = {" ", "IDPROG", "IDVAR", "IDGLOB", "IDFUNC", "IDPROC"};
+char *nometipid[6] = {" ", "IDGLOB", "IDVAR", "IDFUNC", "IDPROC", "IDPROG"};
 
 /*  Strings para nomes dos tipos de variaveis  */
 
@@ -60,6 +60,10 @@ char *nometipvar[5] = {"NAOVAR",
 
 typedef struct celsimb celsimb;
 typedef celsimb *simbolo;
+typedef struct elemlistsimb elemlistsimb;
+typedef elemlistsimb *pontelemlistsimb;
+typedef elemlistsimb *listsimb;
+
 struct celsimb {
     char *cadeia;
     int tid, tvar, tparam, ndims, dims[MAXDIMS+1];
@@ -68,14 +72,12 @@ struct celsimb {
     simbolo escopo, prox;
 };
 
-/* Listas de simbolos*/
-typedef struct elemlistsimb elemlistsimb;
-typedef elemlistsimb *pontelemlistsimb;
-typedef elemlistsimb *listsimb;
+/*  Lista de simbolos    */
+
 struct elemlistsimb {
     simbolo simb;
     pontelemlistsimb prox;
-}
+};
 
 /*  Variaveis globais para a tabela de simbolos e analise semantica */
 
@@ -100,6 +102,7 @@ void VerificaInicRef (void);
 void Incompatibilidade (char *);
 void Esperado(char*);
 void NaoEsperado(char*);
+void InsereListSimb(simbolo, listsimb);
 
 %}
 
@@ -582,21 +585,22 @@ void InicTabSimb () {
     Caso contrario, retorna NULL.
  */
 
-simbolo ProcuraSimb (char *cadeia) {
+simbolo ProcuraSimb (char *cadeia, simbolo escopo) {
     simbolo s; int i;
     i = hash (cadeia);
     for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia);
         s = s->prox);
+    if(s == NULL && escopo->escopo != NULL) return ProcuraSimb(cadeia, escopo->escopo);
     return s;
 }
 
 /*
-    InsereSimb (cadeia, tid, tvar): Insere cadeia na tabela de
+    InsereSimb (cadeia, tid, tvar, escopo): Insere cadeia na tabela de
     simbolos, com tid como tipo de identificador e com tvar como
     tipo de variavel; Retorna um ponteiro para a celula inserida
  */
 
-simbolo InsereSimb (char *cadeia, int tid, int tvar) {
+simbolo InsereSimb (char *cadeia, int tid, int tvar, simbolo escopo) {
     int i; simbolo aux, s;
     i = hash (cadeia); aux = tabsimb[i];
     s = tabsimb[i] = (simbolo) malloc (sizeof (celsimb));
@@ -604,7 +608,36 @@ simbolo InsereSimb (char *cadeia, int tid, int tvar) {
     strcpy (s->cadeia, cadeia);
     s->tid = tid;       s->tvar = tvar;
     s->inic = FALSO;    s->ref = FALSO;
-    s->prox = aux;  return s;
+    s->prox = aux;  s->escopo = escopo;
+    if (declparam) {
+        s->inic = s->ref = s->param = VERDADE;
+        if (s->tid == IDVAR)
+            InsereListSimb (s, &pontparam);
+        s->escopo->nparam++;
+    }
+    else {
+        s->inic = s->ref = s->param = FALSO;
+        if (s->tid == IDVAR)
+            InsereListSimb (s, &pontvardecl);
+    }
+    if (tid == IDGLOB || tid == IDFUNC) {
+        s->listvardecl = (elemlistsimb *) 
+            malloc  (sizeof (elemlistsimb));
+        s->listvardecl->prox = NULL;
+    }
+    if (tid == IDGLOB) {
+        s->listfunc = (elemlistsimb *) 
+            malloc  (sizeof (elemlistsimb));
+        s->listfunc->prox = NULL;
+    }
+    if (tid == IDFUNC) {
+        s->listparam = (elemlistsimb *) 
+            malloc  (sizeof (elemlistsimb));
+        s->listparam->prox = NULL;
+        s->nparam = 0;
+        InsereListSimb (s, &pontfunc);
+    }
+    return s;
 }
 
 /*
@@ -683,4 +716,8 @@ void Esperado (char *s) {
 
 void NaoEsperado (char *s) {
     printf ("\n\n***** Nao Esperado: %s *****\n\n", s);
+}
+
+void InsereListSimb(simbolo s, listsimb p){
+    // TODO implement
 }
