@@ -191,11 +191,17 @@ void InsereListSimb(simbolo, listsimb);
 
 Prog        :	PROGRAM     {printf ("program ");}
                 ID          {printf ("%s ", $3); }
-                OPTRIP      {printf ("{{{\n\n"); escopo = InsereSimb ("##global", IDGLOB, NAOVAR, NULL);}
+                OPTRIP      {
+                    printf ("{{{\n\n");
+                    InicTabSimb(); declparam = FALSO;
+                    escopo = simb = InsereSimb ("##global", IDGLOB, NAOVAR, NULL);
+                    pontvardecl = simb->listvardecl;
+                    pontfunc = simb->listfunc;
+                }
                 GlobDecls
                 ModList
                 MainMod
-                CLTRIP      {printf ("}}}\n"); }
+                CLTRIP      {printf ("}}}\n"); ImprimeTabSimb();}
             ;
 GlobDecls 	:   /* Empty */
             | 	GLOBAL      {printf ("global ");}
@@ -246,20 +252,30 @@ ModHeader   :   FuncHeader
             ;
 FuncHeader	:   Type
                 FUNCTION    {printf ("function ");}
-                ID          {printf ("%s ", $4); escopo = InsereSimb ($4, IDFUNC, tipocorrente, escopo);}
+                ID          {
+                    printf ("%s ", $4);
+                    escopo = simb = InsereSimb ($4, IDFUNC, tipocorrente, escopo);
+                    pontvardecl = simb->listvardecl;
+                    pontparam = simb->listparam;
+                }
                 OPPAR       {printf ("\(");}
                 FuncHd
             ;
-FuncHd      :   CLPAR                   {printf (")\n"); }
-            |   ParamList   CLPAR       {printf (")"); }
+FuncHd      :   CLPAR   {printf (")\n");}
+            |   {declparam = VERDADE;}  ParamList   CLPAR   {printf (")\n"); declparam = FALSO;} // TODO checar o \n
             ;
 ProcHeader  :   PROCEDURE   {printf ("procedure ");}
-                ID          {printf ("%s ", $3);}
+                ID          {
+                    printf ("%s ", $3);
+                    escopo = simb = InsereSimb ($3, IDPROC, tipocorrente, escopo);
+                    pontvardecl = simb->listvardecl;
+                    pontparam = simb->listparam;
+                }
                 OPPAR       {printf ("\(");}
                 ProcEnd
             ;
 ProcEnd     :   CLPAR               {printf (")\n"); }
-            |   ParamList  CLPAR    {printf (")\n"); }
+            |   {declparam = VERDADE;}  ParamList   CLPAR   {printf (")\n"); declparam = FALSO;}
             ;
 ParamList   :   Parameter
             |   ParamList
