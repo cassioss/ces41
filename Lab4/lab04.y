@@ -21,7 +21,7 @@
 #define     DIVIDE  2
 #define     MODULE  3
 
-int tab = 0;
+int tab = 0; // NOTE bota num lugar melhor
 
 /*   Definicao dos tipos de identificadores   */
 
@@ -66,9 +66,9 @@ typedef elemlistsimb *listsimb;
 
 struct celsimb {
     char *cadeia;
-    int tid, tvar, tparam, ndims, dims[MAXDIMS+1];
+    int tid, tvar, tparam, ndims, dims[MAXDIMS+1], param, nparam;
     char inic, ref, array, parametro;
-    listsimb listvar, listparam, listfunc;
+    listsimb listvardecl, listparam, listfunc;
     simbolo escopo, prox;
 };
 
@@ -84,8 +84,9 @@ struct elemlistsimb {
 simbolo tabsimb[NCLASSHASH];
 simbolo simb;
 int tipocorrente;
-simbolo escopo = NULL;
-simbolo escaux = NULL;
+simbolo escopo, escaux;
+int declparam = FALSO;
+listsimb pontvardecl, pontparam, pontfunc;
 
 /*
     Prototipos das funcoes para a tabela de simbolos e analise semantica
