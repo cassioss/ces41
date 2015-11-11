@@ -117,7 +117,7 @@ void comment () {
 	}
 }
 
-*
+/*
 	tratachar: retorna o codigo ASCII de uma constante do tipo char,
    eliminando os apostrofos e as barras invertidas
  */
