@@ -149,14 +149,14 @@ void InsereListSimb(simbolo, listsimb);
 %token  WHILE
 %token  WRITE
 
-%type       <simb>          Variable
-%type       <tipoexpr>      Expression  AuxExpr1  AuxExpr2
-                            AuxExpr3   AuxExpr4   Term   Factor   FuncCall
-%type       <nsubscr>       SubscrList
+%type   <simb>      Variable
+%type   <tipoexpr>  Expression  AuxExpr1  AuxExpr2
+                    AuxExpr3   AuxExpr4   Term   Factor   FuncCall
+%type   <nsubscr>   SubscrList
 %token  <string>    ID
 %token  <valor>     INTCT
 %token  <valreal>   FLOATCT
-%token  <carac>    CHARCT
+%token  <carac>     CHARCT
 %token  <string>    STRING
 
 %token  OR
@@ -189,11 +189,12 @@ void InsereListSimb(simbolo, listsimb);
     Os terminais sao escritos e, depois de alguns,
     para alguma estetica, ha mudanca de linha       */
 
-Prog        :	PROGRAM     {printf ("program ");}
-                ID          {printf ("%s ", $3); }
+Prog        :	PROGRAM
+                ID
                 OPTRIP      {
-                    printf ("{{{\n\n");
-                    InicTabSimb(); declparam = FALSO;
+                    printf ("program %s {{{\n\n", $2);
+                    InicTabSimb();
+                    declparam = FALSO;
                     escopo = simb = InsereSimb ("##global", IDGLOB, NAOVAR, NULL);
                     pontvardecl = simb->listvardecl;
                     pontfunc = simb->listfunc;
@@ -204,8 +205,8 @@ Prog        :	PROGRAM     {printf ("program ");}
                 CLTRIP      {printf ("}}}\n"); ImprimeTabSimb();}
             ;
 GlobDecls 	:   /* Empty */
-            | 	GLOBAL      {printf ("global ");}
-                OPBRACE     {printf ("{\n"); tab++; tabular();}
+            | 	GLOBAL
+                OPBRACE     {printf ("global {\n"); tab++; tabular();}
                 DeclList
                 CLBRACE     {tab--; tabular (); printf ("}\n\n"); }
             ;
@@ -531,7 +532,8 @@ Variable    :   ID  {       // NOTE redundancia de printf
                             Esperado ("Subscrito\(s)");
 
                 }
-            |   ID  OPBRAK  {
+            |   ID
+                OPBRAK  {
                     printf ("%s [ ", $1);
                     escaux = escopo;
                     simb = ProcuraSimb ($1, escaux);
@@ -543,26 +545,28 @@ Variable    :   ID  {       // NOTE redundancia de printf
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDVAR) TipoInadequado ($1);
                     $<simb>$ = simb;
-            }  SubscrList  CLBRAK  {
-                    printf ("] "); $$ = $<simb>3;
-                    if ($$ != NULL)
+                }
+                SubscrList
+                CLBRAK  {
+                printf ("] "); $$ = $<simb>3;
+                if ($$ != NULL)
                         if ($$->array == FALSO)
                             NaoEsperado ("Subscrito\(s)");
                         else if ($$->ndims != $4)
                             Incompatibilidade 
                         ("Numero de subscritos incompativel com declaracao");
-                    }
+                }
             ;
-SubscrList:     AuxExpr4    {
+SubscrList  :   AuxExpr4    {
                     if ($1 != INTEIRO && $1 != CARACTERE)
                         Incompatibilidade ("Tipo inadequado para subscrito");
                     $$ = 1;
                 }
-            |  SubscrList   COMMA  {printf (", ");}   AuxExpr4  {
+            |   SubscrList   COMMA  {printf (", ");}   AuxExpr4  {
                 if ($4 != INTEIRO && $4 != CARACTERE)
                     Incompatibilidade ("Tipo inadequado para subscrito");
                 $$ = $1 + 1;
-               }
+                }
             ;
 FuncCall    :   ID  {
                     printf ("%s", $1);
