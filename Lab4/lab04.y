@@ -72,7 +72,7 @@ struct celsimb {
     simbolo escopo, prox;
 };
 
-/*  Lista de simbolos    */
+/*  Lista de simbolos    */es
 
 struct elemlistsimb {
     simbolo simb;
@@ -96,7 +96,8 @@ void InicTabSimb (void);
 void ImprimeTabSimb (void);
 simbolo InsereSimb (char *, int, int, simbolo);
 int hash (char *);
-simbolo ProcuraSimb (char *, simbolo); // NOTE what about escopo?
+simbolo ProcuraSimbParaInstanciar (char *, simbolo);
+simbolo ProcuraSimbParaUsar (char *, simbolo);
 void DeclaracaoRepetida (char *);
 void TipoInadequado (char *);
 void NaoDeclarado (char *);
@@ -607,11 +608,28 @@ void InicTabSimb () {
     Caso contrario, retorna NULL.
  */
 
-simbolo ProcuraSimb (char *cadeia, simbolo escopo) {
+/*
+    simbolo ProcuraSimb (char *cadeia, simbolo escopo) {
+        simbolo s; int i;
+        i = hash (escopo->cadeia);
+        for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia); s = s->prox);
+        if (s == NULL && escopo->escopo != NULL) return ProcuraSimb(cadeia, escopo->escopo);
+        return s;
+    }
+*/
+
+simbolo ProcuraSimbParaInstanciar (char *cadeia, simbolo escopo) {
     simbolo s; int i;
     i = hash (cadeia);
-    for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia); s = s->prox);
-    if (s == NULL && escopo->escopo != NULL) return ProcuraSimb(cadeia, escopo->escopo);
+    for (s = tabsimb[i]; (s!=NULL) && (strcmp(cadeia, s->cadeia) || strcmp(escopo->cadeia, s->escopo->cadeia)); s = s->prox);
+    return s;
+}
+
+simbolo ProcuraSimbParaUsar (char *cadeia, simbolo escopo) {
+    simbolo s; int i;
+    i = hash (cadeia);
+    for (s = tabsimb[i]; (s!=NULL) && (strcmp(cadeia, s->cadeia) || strcmp(escopo->cadeia, s->escopo->cadeia)); s = s->prox);
+    if(s == NULL && strcmp(escopo->cadeia, "##global")) return ProcuraSimbParaUsar(cadeia, escopo->escopo);
     return s;
 }
 
