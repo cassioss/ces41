@@ -610,9 +610,8 @@ void InicTabSimb () {
 simbolo ProcuraSimb (char *cadeia, simbolo escopo) {
     simbolo s; int i;
     i = hash (cadeia);
-    for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia);
-        s = s->prox);
-    if(s == NULL && escopo->escopo != NULL) return ProcuraSimb(cadeia, escopo->escopo);
+    for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia); s = s->prox);
+    if (s == NULL && escopo->escopo != NULL) return ProcuraSimb(cadeia, escopo->escopo);
     return s;
 }
 
