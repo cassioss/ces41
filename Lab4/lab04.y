@@ -72,7 +72,7 @@ struct celsimb {
     simbolo escopo, prox;
 };
 
-/*  Lista de simbolos    */es
+/*  Lista de simbolos    */
 
 struct elemlistsimb {
     simbolo simb;
@@ -216,10 +216,10 @@ DeclList	:	Declaration
             ;
 Declaration :	Type  ElemList  SCOLON {printf (";\n");}
             ;
-Type		: 	INT     {printf ("int ");}
-            |	FLOAT   {printf ("float ");}
-            |	CHAR    {printf ("char ");}
-            |	LOGIC   {printf ("logic ");}
+Type		: 	INT     {printf ("int ");   tipocorrente = INTEIRO;}
+            |	FLOAT   {printf ("float "); tipocorrente = REAL;}
+            |	CHAR    {printf ("char ");  tipocorrente = CARACTERE;}
+            |	LOGIC   {printf ("logic "); tipocorrente = LOGICO;}
             ;
 ElemList    :	Elem
             |	ElemList
@@ -227,12 +227,12 @@ ElemList    :	Elem
                 Elem
             ;
 Elem        :   ID  { printf ("%s ", $1);
-                    if  (ProcuraSimb ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
+                    if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
                     else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
                             simb->array = FALSO; }
                 }
             |   ID   OPBRAK  { printf ("%s [ ", $1);
-                    if  (ProcuraSimb ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
+                    if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
                     else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
                             simb->array = VERDADE; simb->ndims = 0; }
                 }  DimList  CLBRAK  {printf ("] ");}
@@ -247,7 +247,7 @@ DimList     :  INTCT   { printf ("%d ", $1);
 ModList	    :   /* Empty */
             |	ModList     Module
             ;
-Module      :	ModHeader   ModBody
+Module      :	ModHeader   ModBody { escopo = escopo->escopo; }
             ;
 ModHeader   :   FuncHeader
             |   ProcHeader
@@ -269,14 +269,14 @@ FuncHd      :   CLPAR   {printf (")\n");}
 ProcHeader  :   PROCEDURE   {printf ("procedure ");}
                 ID          {
                     printf ("%s ", $3);
-                    escopo = simb = InsereSimb ($3, IDPROC, tipocorrente, escopo);
+                    escopo = simb = InsereSimb ($3, IDPROC, NAOVAR, escopo);
                     pontvardecl = simb->listvardecl;
                     pontparam = simb->listparam;
                 }
                 OPPAR       {printf ("\(");}
                 ProcEnd
             ;
-ProcEnd     :   CLPAR               {printf (")\n"); }
+ProcEnd     :   CLPAR       {printf (")\n"); }
             |   {declparam = VERDADE;}  ParamList   CLPAR   {printf (")\n"); declparam = FALSO;}
             ;
 ParamList   :   Parameter
@@ -285,7 +285,7 @@ ParamList   :   Parameter
                 Parameter
             ;
 Parameter   :   Type
-                ID          {printf ("%s", $2);}
+                ID          {printf ("%s", $2); }
             ;
 ModBody     :	LocDecls
                 Stats
@@ -296,7 +296,12 @@ LocDecls 	:   /* Empty */
                 DeclList
                 CLBRACE     {tab--; tabular (); printf ("}\n\n"); }
             ;
-MainMod     :   MAIN        {printf ("main\n");}
+MainMod     :   MAIN        {
+                    printf ("main\n");
+                    escopo = simb = InsereSimb("##main", IDPROC, NAOVAR, escopo);
+                    pontvardecl = simb->listvardecl;
+                    pontparam = simb->listparam;
+                }
                 ModBody
             ;
 Stats       :   STATEMENTS  {printf ("statements ");}
@@ -448,7 +453,7 @@ AuxExpr3    :   AuxExpr4
                 }  AuxExpr4  {
                     switch ($2) {
                         case LT: case LE: case GT: case GE:
-                            if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4 != REAL && $4 != CARACTERE)
+                            if (($1 != INTEIRO && $1 != REAL && $1 != CARACTERE) || ($4 != INTEIRO && $4 != REAL && $4 != CARACTERE))
                                 Incompatibilidade   ("Operando improprio para operador relacional");
                             break;
                         case EQ: case NE:
@@ -482,13 +487,13 @@ Term        :   Factor
                 }  Factor  {
                     switch ($2) {
                         case TIMES: case DIVIDE:
-                            if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4!=REAL && $4!=CARACTERE)
+                            if (($1 != INTEIRO && $1 != REAL && $1 != CARACTERE) || ($4 != INTEIRO && $4!=REAL && $4!=CARACTERE))
                                 Incompatibilidade ("Operando improprio para operador aritmetico");
                             if ($1 == REAL || $4 == REAL) $$ = REAL;
                             else $$ = INTEIRO;
                             break;
                         case MODULE:
-                            if ($1 != INTEIRO && $1 != CARACTERE  ||  $4 != INTEIRO && $4 != CARACTERE)
+                            if (($1 != INTEIRO && $1 != CARACTERE)  ||  ($4 != INTEIRO && $4 != CARACTERE))
                                 Incompatibilidade ("Operando improprio para operador resto");
                             $$ = INTEIRO;
                             break;
@@ -518,13 +523,7 @@ Factor		:	Variable  {
             ;
 Variable    :   ID  {       // NOTE redundancia de printf
                     printf ("%s ", $1);
-                    escaux = escopo;
-                    simb = ProcuraSimb ($1, escaux);
-                    while (escaux && !simb) {
-                        escaux = escaux->escopo;
-                        if (escaux)
-                        simb = ProcuraSimb ($1, escaux);
-                    }
+                    simb = ProcuraSimbParaUsar ($1, escopo);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDVAR) TipoInadequado ($1);
                     $$ = simb;
@@ -536,13 +535,7 @@ Variable    :   ID  {       // NOTE redundancia de printf
             |   ID
                 OPBRAK  {
                     printf ("%s [ ", $1);
-                    escaux = escopo;
-                    simb = ProcuraSimb ($1, escaux);
-                    while (escaux && !simb) {
-                        escaux = escaux->escopo;
-                        if (escaux)
-                        simb = ProcuraSimb ($1, escaux);
-                    }
+                    simb = ProcuraSimbParaUsar ($1, escopo);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDVAR) TipoInadequado ($1);
                     $<simb>$ = simb;
@@ -571,13 +564,13 @@ SubscrList  :   AuxExpr4    {
             ;
 FuncCall    :   ID  {
                     printf ("%s", $1);
-                    simb = ProcuraSimb ($1, escopo);
+                    simb = ProcuraSimbParaUsar ($1, escopo);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDFUNC) TipoInadequado ($1);
-                    $$ = simb->tvar;
+                    $<simb>$ = simb;
 		        }
                 OPPAR       {printf ("\(");}
-                FuncTerm
+                FuncTerm { $$ = $<simb>2->tvar; }
             ;
 FuncTerm    :   CLPAR                   {printf (")"); }
             |	ExprList    CLPAR       {printf (")"); }
@@ -607,16 +600,6 @@ void InicTabSimb () {
     Caso ela ali esteja, retorna um ponteiro para sua celula;
     Caso contrario, retorna NULL.
  */
-
-/*
-    simbolo ProcuraSimb (char *cadeia, simbolo escopo) {
-        simbolo s; int i;
-        i = hash (escopo->cadeia);
-        for (s = tabsimb[i]; (s!=NULL) && strcmp(cadeia, s->cadeia); s = s->prox);
-        if (s == NULL && escopo->escopo != NULL) return ProcuraSimb(cadeia, escopo->escopo);
-        return s;
-    }
-*/
 
 simbolo ProcuraSimbParaInstanciar (char *cadeia, simbolo escopo) {
     simbolo s; int i;
@@ -714,6 +697,11 @@ void ImprimeTabSimb () {
                         for (j = 1; j <= s->ndims; j++)
                             printf (" %d", s->dims[j]);
                     }
+                } else {
+                    printf (", %s",
+                        nometipvar[s->tvar]);
+                    if (s->escopo != NULL)
+                        printf(", %s", s->escopo->cadeia);
                 }
                 printf(")\n");
             }
