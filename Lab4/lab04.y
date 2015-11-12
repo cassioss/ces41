@@ -285,7 +285,12 @@ ParamList   :   Parameter
                 Parameter
             ;
 Parameter   :   Type
-                ID          {printf ("%s", $2); }
+                ID   {
+                    printf ("%s", $2);
+                    if  (ProcuraSimbParaInstanciar ($2, escopo)  !=  NULL) DeclaracaoRepetida ($2);
+                    else  { simb = InsereSimb ($2,  IDVAR,  tipocorrente, escopo);
+                        simb->array = FALSO; }
+                }
             ;
 ModBody     :	LocDecls
                 Stats
