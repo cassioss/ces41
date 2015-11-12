@@ -695,20 +695,24 @@ int hash (char *cadeia) {
 
 void ImprimeTabSimb () {
     int i; simbolo s;
-    printf ("\n\n   TABELA  DE  SIMBOLOS:\n\n");
+    printf ("\n\n  =========================\n");
+    printf     ("  = TABELA  DE  SIMBOLOS: =\n");
+    printf     ("  =========================\n");
     for (i = 0; i < NCLASSHASH; i++)
         if (tabsimb[i]) {
-            printf ("Classe %d:\n", i);
+            printf ("\nClasse %d:\n", i);
             for (s = tabsimb[i]; s!=NULL; s = s->prox){
                 printf ("  (%s, %s", s->cadeia,  nometipid[s->tid]);
                 if (s->tid == IDVAR){
                     printf (", %s, %d, %d",
                         nometipvar[s->tvar], s->inic, s->ref);
+                    if (s->escopo != NULL)
+                        printf(", %s", s->escopo->cadeia);
                     if (s->array == VERDADE) {
                         int j;
-                        printf (", EH ARRAY\n\tndims = %d, dimensoes:", s->ndims);
+                        printf (", EH ARRAY\n    ndims = %d, dimensoes:", s->ndims);
                         for (j = 1; j <= s->ndims; j++)
-                            printf ("  %d", s->dims[j]);
+                            printf (" %d", s->dims[j]);
                     }
                 }
                 printf(")\n");
