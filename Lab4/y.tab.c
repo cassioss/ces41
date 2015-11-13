@@ -2836,8 +2836,8 @@ void ImprimeTabSimb () {
                             printf (" %d", s->dims[j]);
                     }
                 } else {
-                    printf (", %s",
-                        nometipvar[s->tvar]);
+                    printf (", %s, %d, %d",
+                        nometipvar[s->tvar], s->inic, s->ref);
                     if (s->escopo != NULL)
                         printf(", %s", s->escopo->cadeia);
                 }
