@@ -9,3 +9,9 @@ gcc main.c y.tab.c yyerror.c -ll -ly -w
 ./a.out < Tests/5_Indexed_variable_value_lower_than_zero/lab04test5 > Tests/5_Indexed_variable_value_lower_than_zero/lab04results5
 ./a.out < Tests/6_Identifier_doubly_declared_in_module/lab04test6 > Tests/6_Identifier_doubly_declared_in_module/lab04results6
 ./a.out < Tests/7_Scalar_variable_as_array/lab04test7 > Tests/7_Scalar_variable_as_array/lab04results7
+./a.out < Tests/8_Return_in_procedure_followed_by_expression/lab04test8 > Tests/8_Return_in_procedure_followed_by_expression/lab04results8 
+./a.out < Tests/9_Return_in_function_followed_by_nothing/lab04test9 > Tests/9_Return_in_function_followed_by_nothing/lab04results9 
+./a.out < Tests/10_Code_used_for_recursivity/lab04test10 > Tests/10_Code_used_for_recursivity/lab04results10 
+./a.out < Tests/11_Subprogram_used_as_parameter/lab04test11 > Tests/11_Subprogram_used_as_parameter/lab04results11
+./a.out < Tests/12_Subprogram_used_as_argument/lab04test12 > Tests/12_Subprogram_used_as_argument/lab04results12
+
