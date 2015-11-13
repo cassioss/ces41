@@ -2,4 +2,10 @@ flex lab04.l
 yacc lab04.y
 gcc main.c y.tab.c yyerror.c -ll -ly -w
 ./a.out < Tests/0_Example/lab04test0 > Tests/0_Example/lab04results0 
-./a.out < Tests/1_Correct/lab04test1 > Tests/1_Correct/lab04results1 
+./a.out < Tests/1_Correct/lab04test1 > Tests/1_Correct/lab04results1
+./a.out < Tests/2_Undeclared_identifier/lab04test2 > Tests/2_Undeclared_identifier/lab04results2 
+./a.out < Tests/3_Module_named_as_global_variable/lab04test3 > Tests/3_Module_named_as_global_variable/lab04results3
+./a.out < Tests/4_Indexed_variable_value_equals_zero/lab04test4 > Tests/4_Indexed_variable_value_equals_zero/lab04results4
+./a.out < Tests/5_Indexed_variable_value_lower_than_zero/lab04test5 > Tests/5_Indexed_variable_value_lower_than_zero/lab04results5
+./a.out < Tests/6_Identifier_doubly_declared_in_module/lab04test6 > Tests/6_Identifier_doubly_declared_in_module/lab04results6
+./a.out < Tests/7_Scalar_variable_as_array/lab04test7 > Tests/7_Scalar_variable_as_array/lab04results7
