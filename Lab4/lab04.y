@@ -226,21 +226,21 @@ ElemList    :	Elem
                 COMMA   {printf (", "); }
                 Elem
             ;
-Elem        :   ID  { printf ("%s ", $1);
+Elem        :   ID  { printf ("%s", $1);
                     if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
                     else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
                             simb->array = FALSO; }
                 }
-            |   ID   OPBRAK  { printf ("%s [ ", $1);
+            |   ID   OPBRAK  { printf ("%s[", $1);
                     if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
                     else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
                             simb->array = VERDADE; simb->ndims = 0; }
-                }  DimList  CLBRAK  {printf ("] ");}
+                }  DimList  CLBRAK  {printf ("]");}
             ;
-DimList     :  INTCT   { printf ("%d ", $1);
+DimList     :  INTCT   { printf ("%d", $1);
                     if ($1 <= 0) Esperado ("Valor inteiro positivo");
                     simb->ndims++; simb->dims[simb->ndims] = $1;}
-            |  DimList   COMMA   INTCT   { printf (", %d ", $3);
+            |  DimList   COMMA   INTCT   { printf (", %d", $3);
                     if ($3 <= 0) Esperado ("Valor inteiro positivo");
                     simb->ndims++; simb->dims[simb->ndims] = $3;}
             ;
@@ -255,7 +255,7 @@ ModHeader   :   FuncHeader
 FuncHeader	:   Type
                 FUNCTION    {printf ("function ");}
                 ID          {
-                    printf ("%s ", $4);
+                    printf ("%s", $4);
                     escopo = simb = InsereSimb ($4, IDFUNC, tipocorrente, escopo);
                     pontvardecl = simb->listvardecl;
                     pontparam = simb->listparam;
@@ -268,7 +268,7 @@ FuncHd      :   CLPAR   {printf (")\n");}
             ;
 ProcHeader  :   PROCEDURE   {printf ("procedure ");}
                 ID          {
-                    printf ("%s ", $3);
+                    printf ("%s", $3);
                     escopo = simb = InsereSimb ($3, IDPROC, NAOVAR, escopo);
                     pontvardecl = simb->listvardecl;
                     pontparam = simb->listparam;
@@ -303,7 +303,7 @@ LocDecls 	:   /* Empty */
             ;
 MainMod     :   MAIN        {
                     printf ("main\n");
-                    escopo = simb = InsereSimb("##main", IDPROC, NAOVAR, escopo);
+                    escopo = simb = InsereSimb("##main", IDPROG, NAOVAR, escopo);
                     pontvardecl = simb->listvardecl;
                     pontparam = simb->listparam;
                 }
@@ -333,8 +333,8 @@ Statement   :   CompStat
             ;
 IfStat		:   IF          {printf ("if ");}
                 Expression
-                THEN        {printf (" then\n"); tab++; tabular();}
-                Statement   {tab--;}
+                THEN        {printf (" then ");}
+                Statement
                 ElseStat
             ;
 ElseStat	:   /* Empty */
@@ -389,7 +389,7 @@ WriteElem	:   STRING      {printf ("%s", $1);}
             |	Expression
             ;
 CallStat    :   CALL        {printf ("call ");}
-                ID          {printf ("%s ", $3);}
+                ID          {printf ("%s", $3);}
                 OPPAR       {printf ("\(");}
                 CallCompl
             ;
@@ -408,7 +408,7 @@ ReturnStat  :	RETURN      {printf ("return");}
 AssignStat  :   Variable  {
                     if  ($1 != NULL) $1->inic = $1->ref = VERDADE;
                 }
-                ASSIGN  {printf ("= ");}  Expression
+                ASSIGN  {printf (" = ");}  Expression
                 SCOLON  {
                     printf (";\n");
                     if ($1 != NULL)
@@ -425,21 +425,21 @@ ExprList	:	Expression
                 Expression
             ;
 Expression  :   AuxExpr1
-            |   Expression  OR  {printf ("|| ");}   AuxExpr1  {
+            |   Expression  OR  {printf (" || ");}   AuxExpr1  {
                     if ($1 != LOGICO || $4 != LOGICO)
                         Incompatibilidade ("Operando improprio para operador or");
                     $$ = LOGICO;
                 }
             ;
 AuxExpr1    :   AuxExpr2
-            |   AuxExpr1  AND  {printf ("&& ");}  AuxExpr2  {
+            |   AuxExpr1  AND  {printf (" && ");}  AuxExpr2  {
                     if ($1 != LOGICO || $4 != LOGICO)
                         Incompatibilidade ("Operando improprio para operador and");
                     $$ = LOGICO;
                 }
             ;
 AuxExpr2    :   AuxExpr3
-            |   NOT  {printf ("! ");}  AuxExpr3  {
+            |   NOT  {printf ("!");}  AuxExpr3  {
                     if ($3 != LOGICO)
                         Incompatibilidade ("Operando improprio para operador not");
                     $$ = LOGICO;
@@ -448,12 +448,12 @@ AuxExpr2    :   AuxExpr3
 AuxExpr3    :   AuxExpr4
             |   AuxExpr4  RELOP  {
                     switch ($2) {
-                        case LT: printf ("< "); break;
-                        case LE: printf ("<= "); break;
-                        case EQ: printf ("== "); break;
-                        case NE: printf ("!= "); break;
-                        case GT: printf ("> "); break;
-                        case GE: printf (">= "); break;
+                        case LT: printf (" < "); break;
+                        case LE: printf (" <= "); break;
+                        case EQ: printf (" == "); break;
+                        case NE: printf (" != "); break;
+                        case GT: printf (" > "); break;
+                        case GE: printf (" >= "); break;
                     }
                 }  AuxExpr4  {
                     switch ($2) {
@@ -472,8 +472,8 @@ AuxExpr3    :   AuxExpr4
 AuxExpr4    :   Term
             |   AuxExpr4  ADOP  {
                     switch ($2) {
-                        case PLUS: printf ("+ "); break;
-                        case MINUS: printf ("- "); break;
+                        case PLUS: printf (" + "); break;
+                        case MINUS: printf (" - "); break;
                     }
                 }  Term  {
                         if ($1 != INTEIRO && $1 != REAL && $1 != CARACTERE || $4 != INTEIRO && $4!=REAL && $4!=CARACTERE)
@@ -511,23 +511,23 @@ Factor		:	Variable  {
                         $$ = $1->tvar;
                     }
                 }
-            |   INTCT  {printf ("%d ", $1); $$ = INTEIRO;}
-            |   FLOATCT  {printf ("%g ", $1); $$ = REAL;}
-            |   CHARCT  {printf ("\'%c\' ", $1); $$ = CARACTERE;}
-            |   TRUE  {printf ("true "); $$ = LOGICO;}
-            |   FALSE  {printf ("false "); $$ = LOGICO;}
-            |   NEG  {printf ("~ ");}  Factor {
+            |   INTCT  {printf ("%d", $1); $$ = INTEIRO;}
+            |   FLOATCT  {printf ("%g", $1); $$ = REAL;}
+            |   CHARCT  {printf ("\'%c\'", $1); $$ = CARACTERE;}
+            |   TRUE  {printf ("true"); $$ = LOGICO;}
+            |   FALSE  {printf ("false"); $$ = LOGICO;}
+            |   NEG  {printf ("~");}  Factor {
                     if ($3 != INTEIRO && $3 != REAL && $3 != CARACTERE)
                         Incompatibilidade  ("Operando improprio para menos unario");
                     if ($3 == REAL) $$ = REAL;
                     else $$ = INTEIRO;
                 }
-            |   OPPAR   {printf ("( ");}  Expression  CLPAR
+            |   OPPAR   {printf ("(");}  Expression  CLPAR
                 {printf (") "); $$ = $3;}
             |	FuncCall
             ;
-Variable    :   ID  {       // NOTE redundancia de printf
-                    printf ("%s ", $1);
+Variable    :   ID  {
+                    printf ("%s", $1);
                     simb = ProcuraSimbParaUsar ($1, escopo);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDVAR) TipoInadequado ($1);
@@ -539,7 +539,7 @@ Variable    :   ID  {       // NOTE redundancia de printf
                 }
             |   ID
                 OPBRAK  {
-                    printf ("%s [ ", $1);
+                    printf ("%s[", $1);
                     simb = ProcuraSimbParaUsar ($1, escopo);
                     if (simb == NULL) NaoDeclarado ($1);
                     else if (simb->tid != IDVAR) TipoInadequado ($1);
@@ -547,7 +547,7 @@ Variable    :   ID  {       // NOTE redundancia de printf
                 }
                 SubscrList
                 CLBRAK  {
-                printf ("] "); $$ = $<simb>3;
+                printf ("]"); $$ = $<simb>3;
                 if ($$ != NULL)
                         if ($$->array == FALSO)
                             NaoEsperado ("Subscrito\(s)");
