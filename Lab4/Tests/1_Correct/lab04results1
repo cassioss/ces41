@@ -16,7 +16,7 @@ statements {
 	inf = 1;
 	sup = ntab;
 	while !achou && sup >= inf do {
-		med = (inf + sup) / 2;
+		med = (inf + sup)  / 2;
 		compara = 0;
 		fimteste = false;
 		for i init 0 while !fimteste && compara == 0 new i + 1 do {

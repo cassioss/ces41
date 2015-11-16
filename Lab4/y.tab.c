@@ -2052,12 +2052,12 @@ yyreduce:
 
   case 80:
 #line 349 "lab04.y"
-    {printf ("repeat ");}
+    {printf ("repeat {\n"); tab++; tabular(); }
     break;
 
   case 81:
 #line 351 "lab04.y"
-    {printf ("while ");}
+    {tab--; tabular(); printf ("} while ");}
     break;
 
   case 82:
@@ -2317,9 +2317,9 @@ yyreduce:
 #line 486 "lab04.y"
     {
                     switch ((yyvsp[(2) - (2)].atr)) {
-                        case TIMES: printf ("* "); break;
-                        case DIVIDE: printf ("/ "); break;
-                        case MODULE: printf ("%% "); break;
+                        case TIMES: printf (" * "); break;
+                        case DIVIDE: printf (" / "); break;
+                        case MODULE: printf (" %% "); break;
                     }
                 }
     break;

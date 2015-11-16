@@ -1,7 +1,6 @@
 flex lab04.l
 yacc lab04.y
 gcc main.c y.tab.c yyerror.c -ll -ly -w
-./a.out < Tests/0_Example/lab04test0 > Tests/0_Example/lab04results0 
 ./a.out < Tests/1_Correct/lab04test1 > Tests/1_Correct/lab04results1
 ./a.out < Tests/2_Undeclared_identifier/lab04test2 > Tests/2_Undeclared_identifier/lab04results2 
 ./a.out < Tests/3_Module_named_as_global_variable/lab04test3 > Tests/3_Module_named_as_global_variable/lab04results3

@@ -346,9 +346,9 @@ WhileStat   :	WHILE       {printf ("while ");} // TODO test type of expression
                 DO          {printf (" do ");}
                 Statement
             ;
-RepeatStat  :	REPEAT      {printf ("repeat ");}
+RepeatStat  :	REPEAT      {printf ("repeat {\n"); tab++; tabular(); }
                 Statement
-                WHILE       {printf ("while ");}
+                WHILE       {tab--; tabular(); printf ("} while ");}
                 Expression
                 SCOLON      {printf (";\n");}
             ;
@@ -485,9 +485,9 @@ AuxExpr4    :   Term
 Term        :   Factor
             |   Term  MULTOP   {
                     switch ($2) {
-                        case TIMES: printf ("* "); break;
-                        case DIVIDE: printf ("/ "); break;
-                        case MODULE: printf ("%% "); break;
+                        case TIMES: printf (" * "); break;
+                        case DIVIDE: printf (" / "); break;
+                        case MODULE: printf (" %% "); break;
                     }
                 }  Factor  {
                     switch ($2) {
