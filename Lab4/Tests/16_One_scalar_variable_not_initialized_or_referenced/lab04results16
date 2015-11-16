@@ -1,0 +1,23 @@
+program AnaliseDeTexto {{{
+
+global {
+	logic a;
+}
+
+main
+statements {
+}
+
+}}}
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 5:
+  (a, IDVAR, LOGICO, 0, 0, ##global)
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)

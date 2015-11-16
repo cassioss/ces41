@@ -9,6 +9,15 @@ statements {
 	return 0;
 }
 
+procedure FuncaoTeste2()
+statements {
+	return;
+}
+
+procedure FuncaoTeste3()
+statements {
+}
+
 main
 statements {
 }
@@ -29,3 +38,9 @@ Classe 8:
 
 Classe 17:
   (FuncaoTeste, IDPROC, NAOVAR, 0, 0, ##global)
+
+Classe 21:
+  (FuncaoTeste2, IDPROC, NAOVAR, 0, 0, ##global)
+
+Classe 22:
+  (FuncaoTeste3, IDPROC, NAOVAR, 0, 0, ##global)

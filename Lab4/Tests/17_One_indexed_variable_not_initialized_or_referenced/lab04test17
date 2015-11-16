@@ -1,0 +1,4 @@
+program AnaliseDeTexto {{{global {	logic a[2];}mainstatements {	}
+}}}
+
+/* ERRO SEMÂNTICO ESPERADO: VARIÁVEL INDEXADA NÃO REFERENCIADA OU INICIALIZADA */

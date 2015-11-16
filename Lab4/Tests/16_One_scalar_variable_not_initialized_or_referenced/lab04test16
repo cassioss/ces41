@@ -1,0 +1,4 @@
+program AnaliseDeTexto {{{global {	logic a;}mainstatements {	}
+}}}
+
+/* ERRO SEMÂNTICO ESPERADO: VARIÁVEL ESCALAR NÃO REFERENCIADA OU INICIALIZADA */

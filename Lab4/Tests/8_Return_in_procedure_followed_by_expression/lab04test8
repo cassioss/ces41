@@ -1,1 +1,6 @@
-program AnaliseDeTexto {{{global {    int a;}/* ERRO SEMÂNTICO ESPERADO: PROCEDURE NÃO TEM RETURN */procedure FuncaoTeste()statements {    return 0;}mainstatements {}}}}
+program AnaliseDeTexto {{{global {    int a;}/* ERRO SEMÂNTICO ESPERADO: PROCEDURE NÃO PODE ACEITAR RETURN COM VARIÁVEL */procedure FuncaoTeste()statements {    return 0;}
+
+procedure FuncaoTeste2()statements {    return;}
+
+procedure FuncaoTeste3()statements {
+}mainstatements {}}}}

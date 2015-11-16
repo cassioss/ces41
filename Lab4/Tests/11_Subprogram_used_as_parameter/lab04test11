@@ -1,1 +1,0 @@
-program AnaliseDeTexto {{{global {    int a;}logic function EhBooleano()statements{    return true;}/* ERRO SEMÂNTICO ESPERADO: SUBPROGRAMA SENDO UTILIZADO COMO PARÂMETRO DE OUTRO SUBPROGRAMA */int function FuncaoZero(logic EhBooleano)statements {    return 0;}mainstatements {}}}}

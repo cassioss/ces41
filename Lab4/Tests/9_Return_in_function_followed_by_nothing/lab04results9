@@ -6,6 +6,16 @@ global {
 
 int function FuncaoTeste()
 statements {
+	return;
+}
+
+int function FuncaoTeste2()
+statements {
+}
+
+int function FuncaoTeste3()
+statements {
+	return 1;
 }
 
 main
@@ -28,3 +38,9 @@ Classe 8:
 
 Classe 17:
   (FuncaoTeste, IDFUNC, INTEIRO, 0, 0, ##global)
+
+Classe 21:
+  (FuncaoTeste2, IDFUNC, INTEIRO, 0, 0, ##global)
+
+Classe 22:
+  (FuncaoTeste3, IDFUNC, INTEIRO, 0, 0, ##global)

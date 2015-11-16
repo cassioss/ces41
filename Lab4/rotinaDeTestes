@@ -11,9 +11,9 @@ gcc main.c y.tab.c yyerror.c -ll -ly -w
 ./a.out < Tests/8_Return_in_procedure_followed_by_expression/lab04test8 > Tests/8_Return_in_procedure_followed_by_expression/lab04results8 
 ./a.out < Tests/9_Return_in_function_followed_by_nothing/lab04test9 > Tests/9_Return_in_function_followed_by_nothing/lab04results9 
 ./a.out < Tests/10_Code_used_for_recursivity/lab04test10 > Tests/10_Code_used_for_recursivity/lab04results10 
-./a.out < Tests/11_Subprogram_used_as_parameter/lab04test11 > Tests/11_Subprogram_used_as_parameter/lab04results11
 ./a.out < Tests/12_Subprogram_used_as_argument/lab04test12 > Tests/12_Subprogram_used_as_argument/lab04results12
 ./a.out < Tests/13_For_header_incorrect_type/lab04test13 > Tests/13_For_header_incorrect_type/lab04results13 
 ./a.out < Tests/14_For_expressions_with_incorrect_type/lab04test14 > Tests/14_For_expressions_with_incorrect_type/lab04results14 
 ./a.out < Tests/15_If_while_repeat_not_using_logic/lab04test15 > Tests/15_If_while_repeat_not_using_logic/lab04results15
-
+./a.out < Tests/16_One_scalar_variable_not_initialized_or_referenced/lab04test16 > Tests/16_One_scalar_variable_not_initialized_or_referenced/lab04results16 
+./a.out < Tests/17_One_indexed_variable_not_initialized_or_referenced/lab04test17 > Tests/17_One_indexed_variable_not_initialized_or_referenced/lab04results17
