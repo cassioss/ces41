@@ -10,13 +10,25 @@ local {
 }
 
 statements {
-	for i init false while i <= 5 new i + 1 do {
+	for i init false
+
+***** Incompatibilidade: Inicializacao impropria para cabecalho de comando for *****
+
+ while i <= 5 new i + 1 do {
 		write ("O");
 	}
-	for i init 0 while 1 new i + 1 do {
+	for i init 0 while 1
+
+***** Incompatibilidade: Operando improprio para comando while *****
+
+ new i + 1 do {
 		write ("O");
 	}
-	for i init 0 while i <= 5 new false do {
+	for i init 0 while i <= 5 new false
+
+***** Incompatibilidade: Atribuicao de tipo improprio para comando new *****
+
+ do {
 		write ("O");
 	}
 }
@@ -41,7 +53,7 @@ Classe 8:
   (##main, IDPROG, NAOVAR, 0, 0, ##global)
 
 Classe 13:
-  (i, IDVAR, INTEIRO, 0, 1, FuncaoTeste)
+  (i, IDVAR, INTEIRO, 1, 1, FuncaoTeste)
 
 Classe 17:
   (FuncaoTeste, IDPROC, NAOVAR, 0, 0, ##global)

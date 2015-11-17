@@ -1,1 +1,5 @@
-program AnaliseDeTexto {{{/*  Variaveis globais  */global {    int a;}/*  Procedimento para escrever uma cadeia de letras O *//* ERRO SEMÂNTICO ESPERADO: MÓDULO COM MESMO NOME QUE VARIÁVEL GLOBAL */procedure a ()local {int i;}statements {    for i init 1 while i <= 5 new i+1 do {        write ("O");    }}/*  Modulo principal  */mainstatements {call a ();}}}}
+program AnaliseDeTexto {{{/*  Variaveis globais  */global {    int a, b;}/* ERRO SEMÂNTICO ESPERADO: MÓDULO COM MESMO NOME QUE VARIÁVEL GLOBAL */procedure a ()statements {    }
+
+/* ERRO SEMÂNTICO ESPERADO: MÓDULO COM MESMO NOME QUE VARIÁVEL GLOBAL */
+
+int function b ()statements {    return 0;}/*  Modulo principal  */mainstatements {}}}}

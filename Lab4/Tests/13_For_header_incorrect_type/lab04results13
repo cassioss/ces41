@@ -10,7 +10,11 @@ local {
 }
 
 statements {
-	for a init 1 while i <= 5 new i + 1 do {
+	for a
+
+***** Incompatibilidade: Cabecalho de tipo improprio para comando for *****
+
+ init 1 while i <= 5 new i + 1 do {
 		write ("O");
 	}
 }
@@ -28,7 +32,7 @@ statements {
   =========================
 
 Classe 5:
-  (a, IDVAR, LOGICO, 0, 0, ##global)
+  (a, IDVAR, LOGICO, 1, 1, ##global)
   (##global, IDGLOB, NAOVAR, 0, 0)
 
 Classe 8:

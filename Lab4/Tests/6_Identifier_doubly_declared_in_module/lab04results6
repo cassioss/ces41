@@ -39,7 +39,7 @@ Classe 8:
   (##main, IDPROG, NAOVAR, 0, 0, ##global)
 
 Classe 13:
-  (i, IDVAR, INTEIRO, 0, 1, FuncaoTeste)
+  (i, IDVAR, INTEIRO, 1, 1, FuncaoTeste)
 
 Classe 17:
   (FuncaoTeste, IDPROC, NAOVAR, 0, 0, ##global)

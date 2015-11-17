@@ -256,6 +256,7 @@ FuncHeader	:   Type
                 FUNCTION    {printf ("function ");}
                 ID          {
                     printf ("%s", $4);
+                    if  (ProcuraSimbParaInstanciar ($4, escopo)  !=  NULL) DeclaracaoRepetida ($4);
                     escopo = simb = InsereSimb ($4, IDFUNC, tipocorrente, escopo);
                     pontvardecl = simb->listvardecl;
                     pontparam = simb->listparam;
@@ -264,11 +265,12 @@ FuncHeader	:   Type
                 FuncHd
             ;
 FuncHd      :   CLPAR   {printf (")\n");}
-            |   {declparam = VERDADE;}  ParamList   CLPAR   {printf (")\n"); declparam = FALSO;} // TODO checar o \n
+            |   {declparam = VERDADE;}  ParamList   CLPAR   {printf (")\n"); declparam = FALSO;}
             ;
 ProcHeader  :   PROCEDURE   {printf ("procedure ");}
                 ID          {
                     printf ("%s", $3);
+                    if  (ProcuraSimbParaInstanciar ($3, escopo)  !=  NULL) DeclaracaoRepetida ($3);
                     escopo = simb = InsereSimb ($3, IDPROC, NAOVAR, escopo);
                     pontvardecl = simb->listvardecl;
                     pontparam = simb->listparam;
@@ -332,7 +334,10 @@ Statement   :   CompStat
             |	SCOLON      {printf (";\n");}
             ;
 IfStat		:   IF          {printf ("if ");}
-                Expression
+                Expression  {
+                    if ($3 != LOGICO)
+                        Incompatibilidade ("Operando improprio para comando if");
+                }
                 THEN        {printf (" then ");}
                 Statement
                 ElseStat
@@ -341,25 +346,44 @@ ElseStat	:   /* Empty */
             |	ELSE        {tabular(); printf ("else ");}
                 Statement
             ;
-WhileStat   :	WHILE       {printf ("while ");} // TODO test type of expression
-                Expression
+WhileStat   :	WHILE       {printf ("while ");}
+                Expression  {
+                    if ($3 != LOGICO)
+                        Incompatibilidade ("Operando improprio para comando while");
+                }
                 DO          {printf (" do ");}
                 Statement
             ;
 RepeatStat  :	REPEAT      {printf ("repeat {\n"); tab++; tabular(); }
                 Statement
                 WHILE       {tab--; tabular(); printf ("} while ");}
-                Expression
+                Expression  {
+                    if ($6 != LOGICO)
+                        Incompatibilidade ("Operando improprio para comando repeat");
+                }
                 SCOLON      {printf (";\n");}
             ;
 ForStat	    :	FOR         {printf ("for ");}
-                Variable
+                Variable    {
+                    if ($3->tvar != INTEIRO)
+                        Incompatibilidade ("Cabecalho de tipo improprio para comando for");
+                }
                 INIT        {printf (" init ");}
-                Expression
+                Expression   {
+                    if ($7 != INTEIRO)
+                        Incompatibilidade ("Inicializacao impropria para cabecalho de comando for");
+                    $3->inic = $3->ref = VERDADE;
+                }
                 WHILE       {printf (" while ");}
-                Expression
+                Expression  {
+                    if ($11 != LOGICO)
+                        Incompatibilidade ("Operando improprio para comando while");
+                }
                 NEW         {printf (" new ");}
-                Expression
+                Expression  {
+                    if ($15 != INTEIRO)
+                        Incompatibilidade ("Atribuicao de tipo improprio para comando new");
+                }
                 DO          {printf (" do ");}
                 Statement
             ;
@@ -369,7 +393,9 @@ ReadStat   	:   READ        {printf ("read ");}
                 CLPAR       {printf (")"); }
                 SCOLON      {printf (";\n");}
             ;
-ReadList	:   Variable
+ReadList	:   Variable    {
+                    $1->inic = VERDADE;
+                }
             |	ReadList
                 COMMA       {printf (", ");}
                 Variable
@@ -400,9 +426,19 @@ CallFinish  :   CLPAR       {printf (")");}
                 SCOLON      {printf (";\n");}
             ;
 ReturnStat  :	RETURN      {printf ("return");}
-                SCOLON      {printf(";\n");}
+                SCOLON      {printf(";\n");
+                    if(escopo->tid == IDFUNC)
+                        Incompatibilidade("Funcao deveria retornar um valor");
+                }
             |	RETURN      {printf ("return ");}
-                Expression
+                Expression  {
+                    if(escopo->tid == IDFUNC){
+                        if($3 != escopo->tvar)
+                            Incompatibilidade ("Tipo retornado diferente do tipo esperado");
+                    } else {
+                        Incompatibilidade ("Retorno inesperado de um valor");
+                    }
+                }
                 SCOLON      {printf(";\n");}
             ;
 AssignStat  :   Variable  {
@@ -575,7 +611,9 @@ FuncCall    :   ID  {
                     $<simb>$ = simb;
 		        }
                 OPPAR       {printf ("\(");}
-                FuncTerm { $$ = $<simb>2->tvar; }
+                FuncTerm {
+                    $$ = $<simb>2->tvar;
+                }
             ;
 FuncTerm    :   CLPAR                   {printf (")"); }
             |	ExprList    CLPAR       {printf (")"); }
@@ -755,5 +793,5 @@ void NaoEsperado (char *s) {
 }
 
 void InsereListSimb(simbolo s, listsimb p){
-    // TODO implement
+    // Action being done outside of its scope (NOTE: encapsulate it later)
 }

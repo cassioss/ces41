@@ -10,13 +10,25 @@ local {
 }
 
 statements {
-	if 1 then i = 0;
-	while 1 do {
+	if 1
+
+***** Incompatibilidade: Operando improprio para comando if *****
+
+ then i = 0;
+	while 1
+
+***** Incompatibilidade: Operando improprio para comando while *****
+
+ do {
 		i = i + 1;
 	}
 	repeat {
 		write ("O\n");
-	} while 0;
+	} while 0
+
+***** Incompatibilidade: Operando improprio para comando repeat *****
+
+;
 }
 
 main

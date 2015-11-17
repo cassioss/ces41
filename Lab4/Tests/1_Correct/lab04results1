@@ -124,7 +124,7 @@ Classe 5:
   (##global, IDGLOB, NAOVAR, 0, 0)
 
 Classe 7:
-  (c, IDVAR, CARACTERE, 0, 1, ##main)
+  (c, IDVAR, CARACTERE, 1, 1, ##main)
   (ntab, IDVAR, INTEIRO, 1, 1, ##global)
   (palavra, IDVAR, CARACTERE, 1, 1, ##global, EH ARRAY
     ndims = 1, dimensoes: 10)
@@ -137,16 +137,16 @@ Classe 11:
 
 Classe 13:
   (posic, IDVAR, INTEIRO, 1, 1, ##main)
-  (i, IDVAR, INTEIRO, 0, 1, ##main)
-  (i, IDVAR, INTEIRO, 0, 1, ExibirTabela)
-  (i, IDVAR, INTEIRO, 0, 1, Inserir)
+  (i, IDVAR, INTEIRO, 1, 1, ##main)
+  (i, IDVAR, INTEIRO, 1, 1, ExibirTabela)
+  (i, IDVAR, INTEIRO, 1, 1, Inserir)
   (posic, IDVAR, INTEIRO, 1, 1, Inserir)
   (posic, IDVAR, INTEIRO, 1, 1, Procura)
-  (i, IDVAR, INTEIRO, 0, 1, Procura)
+  (i, IDVAR, INTEIRO, 1, 1, Procura)
 
 Classe 14:
-  (j, IDVAR, INTEIRO, 0, 1, ExibirTabela)
-  (j, IDVAR, INTEIRO, 0, 1, Inserir)
+  (j, IDVAR, INTEIRO, 1, 1, ExibirTabela)
+  (j, IDVAR, INTEIRO, 1, 1, Inserir)
   (fimteste, IDVAR, LOGICO, 1, 1, Procura)
 
 Classe 15:

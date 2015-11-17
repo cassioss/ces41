@@ -1,23 +1,28 @@
 program AnaliseDeTexto {{{
 
 global {
-	int a;
+	int a, b;
 }
 
-procedure a()
-local {
-	int i;
-}
+procedure a
 
+***** Declaracao Repetida: a *****
+
+()
 statements {
-	for i init 1 while i <= 5 new i + 1 do {
-		write ("O");
-	}
+}
+
+int function b
+
+***** Declaracao Repetida: b *****
+
+()
+statements {
+	return 0;
 }
 
 main
 statements {
-	call a();
 }
 
 }}}
@@ -32,8 +37,9 @@ Classe 5:
   (a, IDVAR, INTEIRO, 0, 0, ##global)
   (##global, IDGLOB, NAOVAR, 0, 0)
 
+Classe 6:
+  (b, IDFUNC, INTEIRO, 0, 0, ##global)
+  (b, IDVAR, INTEIRO, 0, 0, ##global)
+
 Classe 8:
   (##main, IDPROG, NAOVAR, 0, 0, ##global)
-
-Classe 13:
-  (i, IDVAR, INTEIRO, 0, 1, a)

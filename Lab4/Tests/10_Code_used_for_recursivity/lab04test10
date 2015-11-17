@@ -1,1 +1,0 @@
-program AnaliseDeTexto {{{global {    int a;}/* ERRO ESPERADO: CHAMADA RECURSIVA DE UMA FUNÇÃO */int function FuncaoTeste(int n)statements {    if n < 0 then return 0;    if n == 0 then return 1;    return n * FuncaoTeste(n-1);}mainstatements {    call FuncaoTeste();}}}}

@@ -1,9 +1,4 @@
 program AnaliseDeTexto {{{global {    int a;}/* ERRO SEMÂNTICO ESPERADO: TODA FUNÇÃO DEVE RETORNAR UMA VARIÁVEL */int function FuncaoTeste()statements {
-	return;}
-
-/* ERRO SEMÂNTICO ESPERADO: TODA FUNÇÃO DEVE RETORNAR UMA VARIÁVEL */
-
-int function FuncaoTeste2()statements {
-}int function FuncaoTeste3()statements {
+	return;}int function FuncaoTeste3()statements {
 	return 1;}mainstatements {}
 }}}
