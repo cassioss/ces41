@@ -1,0 +1,35 @@
+program teste
+local {
+	int a, b, c, i, j; float k; logic b1;
+   	int A[5,4];
+}
+statements {
+	write ("Valor 1: ", 14, "; Valor 2: ", 15.2, "; Valor 3: ", true);
+	write ("Valor de 3+4: ", 3+4);
+	a = 1;
+	b = 2;
+	i = 3;
+	j = 4;
+	c = a + b + i + j + 20;
+	k = 12.6;
+	b1 = true;
+	write ("c = ", c, "; k = ", k, "; b1 = ", b1, ";");
+	i = 4; j = 5; b1 = true;
+	if b1 then {i = j + 6;} else {i = i + 15;}
+	write ("i = ", i);
+
+	i = 4; j = 5; b1 = true;
+	while b1 do {i = i + j; b1 = false;}
+	write ("i = ", i);
+
+	i = 3;
+	k = 20.3;
+	write ("i = ", i, "; k = ", k);
+
+/*	while (i < k) do {
+		i = i + 4;
+		write ("i = ", i, "; k = ", k);
+	}                                       */
+
+	write ("Valor de i+k: ", i+k);
+}

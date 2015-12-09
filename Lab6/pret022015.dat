@@ -1,0 +1,15 @@
+program teste
+local {
+	int i, j, k; float x, y; logic a, b; char m, n;
+}
+statements {
+	read (i, j, x, b);
+	write ("i: ", i, "; j: ", j, "; x: ", x, "; b: ", b);
+	k = i + j;
+	y = x + 3.4;
+	a = i < j;
+	write ("k: ", k, "; y: ", y, "; a: ", a);
+  	read (m);
+  	n = m + ' ';
+	write ("m: ", m, "; n: ", n);
+}
