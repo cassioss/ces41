@@ -473,14 +473,31 @@ IfStat		:   IF          {printf ("if ");}
                 }
                 THEN        {printf (" then ");}
                 Statement   {
+                    $<quad>$ = quadcorrente;
                     $<quad>4->result.atr.rotulo =
                         GeraQuadrupla (NOP, opndidle, opndidle, opndidle);
                 }
-                ElseStat
+                ElseStat    {
+                    if ($<quad>8->prox != quadcorrente) {
+                        quadaux = $<quad>8->prox;
+                        $<quad>8->prox = quadaux->prox;
+                        quadaux->prox = $<quad>8->prox->prox;
+                        $<quad>8->prox->prox = quadaux;
+                        RenumQuadruplas ($<quad>8, quadcorrente);
+                    }
+                }
             ;
 ElseStat	:   /* Empty */
-            |	ELSE        {tabular(); printf ("else ");}
-                Statement
+            |	ELSE  {
+                    tabular(); printf ("else ");
+                    opndaux.tipo = ROTOPND;
+                    $<quad>$ =
+                        GeraQuadrupla (OPJUMP, opndidle, opndidle, opndaux);
+                }
+                Statement   {
+                    $<quad>2->result.atr.rotulo =
+                    GeraQuadrupla (NOP, opndidle, opndidle, opndidle);
+                }
             ;
 WhileStat   :	WHILE       {printf ("while ");}
                 Expression  {
