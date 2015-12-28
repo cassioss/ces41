@@ -21,6 +21,9 @@
 #define     DIVIDE  2
 #define     MODULE  3
 
+
+
+/* To help indent */
 int tab = 0; // NOTE bota num lugar melhor
 
 /*   Definicao dos tipos de identificadores   */
@@ -61,9 +64,9 @@ int tab = 0; // NOTE bota num lugar melhor
 #define     NOP             18
 #define     OPJUMP          19
 #define     OPJF            20
-#define     PARAM           21
-#define     OPREAD          22
-#define     OPWRITE         23
+#define     OPREAD          21
+#define     OPWRITE         22
+#define     PARAM           23
 
 /* Definicao de constantes para os tipos de operandos de quadruplas */
 
@@ -99,7 +102,7 @@ char *nometipvar[5] = {"NAOVAR",
 char *nomeoperquad[24] = {"",
     "OR", "AND", "LT", "LE", "GT", "GE", "EQ", "NE", "MAIS",
     "MENOS", "MULT", "DIV", "RESTO", "MENUN", "NOT", "ATRIB",
-    "OPENMOD", "NOP", "JUMP", "JF", "PARAM", "READ", "WRITE"
+    "OPENMOD", "NOP", "JUMP", "JF", "READ", "WRITE", "PARAM"
 };
 
 /*
@@ -173,8 +176,7 @@ typedef celmodhead *modhead;
 union atribopnd {
     simbolo simb; int valint; float valfloat;
     char valchar; char vallogic; char *valcad;
-    quadrupla rotulo;
-    modhead modulo;
+    quadrupla rotulo; modhead modulo;
 };
 
 struct operando {
@@ -271,9 +273,10 @@ struct infovariavel {
 
 %type   <infovar>   Variable
 %type   <infoexpr>  Expression  AuxExpr1  AuxExpr2
-                    AuxExpr3   AuxExpr4   Term   Factor   FuncCall  WriteElem
+                    AuxExpr3    AuxExpr4   Term
+                    Factor    FuncCall   WriteElem
 %type   <nsubscr>   SubscrList
-%type   <nargs>   ReadList  WriteList
+%type   <nargs>     ReadList   WriteList
 %token  <string>    ID
 %token  <valor>     INTCT
 %token  <valreal>   FLOATCT
@@ -314,24 +317,27 @@ Prog        :	PROGRAM
                 ID
                 OPTRIP      {
                     printf ("program %s {{{\n\n", $2);
-                    InicTabSimb (); InicCodIntermed (); numtemp = 0;
+                    InicTabSimb();
+                    InicCodIntermed();
+                    numtemp = 0;
                     declparam = FALSO;
                     escopo = simb = InsereSimb ("##global", IDGLOB, NAOVAR, NULL);
+                    InicCodIntermMod(simb);
                     pontvardecl = simb->listvardecl;
                     pontfunc = simb->listfunc;
-                    InicCodIntermMod (simb);
                     opnd1.tipo = MODOPND;
                     opnd1.atr.modulo = modcorrente;
                     GeraQuadrupla (OPENMOD, opnd1, opndidle, opndidle);
+                    
                 }
                 GlobDecls
                 ModList
                 MainMod
-                CLTRIP {
-                    VerificaInicRef ();
-                    ImprimeTabSimb ();
-                    ImprimeQuadruplas ();
+                CLTRIP      {
                     printf ("}}}\n");
+                    VerificaInicRef ();
+                    ImprimeTabSimb();
+                    ImprimeQuadruplas();
                 }
             ;
 GlobDecls 	:   /* Empty */
@@ -357,31 +363,21 @@ ElemList    :	Elem
             ;
 Elem        :   ID  { printf ("%s", $1);
                     if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
-                    else  {
-                        simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
-                        simb->array = FALSO;
-                    }
+                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
+                            simb->array = FALSO; }
                 }
-            |   ID   OPBRAK  {
-                    printf ("%s[", $1);
-                    if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL)
-                        DeclaracaoRepetida ($1);
-                    else  {
-                        simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
-                        simb->array = VERDADE; simb->ndims = 0;
-                    }
+            |   ID   OPBRAK  { printf ("%s[", $1);
+                    if  (ProcuraSimbParaInstanciar ($1, escopo)  !=  NULL) DeclaracaoRepetida ($1);
+                    else  { simb = InsereSimb ($1,  IDVAR,  tipocorrente, escopo);
+                            simb->array = VERDADE; simb->ndims = 0; }
                 }  DimList  CLBRAK  {printf ("]");}
             ;
-DimList     :   INTCT   {
-                    printf ("%d", $1);
+DimList     :  INTCT   { printf ("%d", $1);
                     if ($1 <= 0) Esperado ("Valor inteiro positivo");
-                    simb->ndims++; simb->dims[simb->ndims] = $1;
-                }
-            |   DimList   COMMA   INTCT   {
-                    printf (", %d", $3);
+                    simb->ndims++; simb->dims[simb->ndims] = $1;}
+            |  DimList   COMMA   INTCT   { printf (", %d", $3);
                     if ($3 <= 0) Esperado ("Valor inteiro positivo");
-                    simb->ndims++; simb->dims[simb->ndims] = $3;
-                }
+                    simb->ndims++; simb->dims[simb->ndims] = $3;}
             ;
 ModList	    :   /* Empty */
             |	ModList     Module
@@ -478,49 +474,43 @@ IfStat		:   IF          {printf ("if ");}
                         Incompatibilidade ("Operando improprio para comando if");
                     opndaux.tipo = ROTOPND;
                     $<quad>$ = 
-                    GeraQuadrupla (OPJF, $3.opnd, opndidle, opndaux);
+                        GeraQuadrupla (OPJF, $3.opnd, opndidle, opndaux);
                 }
-                THEN        {
-                    printf (" then ");
+                THEN        {printf (" then ");}
+                Statement   {
                     $<quad>$ = quadcorrente;
                     $<quad>4->result.atr.rotulo =
                         GeraQuadrupla (NOP, opndidle, opndidle, opndidle);
                 }
-                Statement
-                ElseStat {
+                ElseStat    {
                     if ($<quad>8->prox != quadcorrente) {
-                            quadaux = $<quad>8->prox;
-                            $<quad>8->prox = quadaux->prox;
-                            quadaux->prox = $<quad>8->prox->prox;
-                            $<quad>8->prox->prox = quadaux;
-                            RenumQuadruplas ($<quad>8, quadcorrente);
+                        quadaux = $<quad>8->prox;
+                        $<quad>8->prox = quadaux->prox;
+                        quadaux->prox = $<quad>8->prox->prox;
+                        $<quad>8->prox->prox = quadaux;
+                        RenumQuadruplas ($<quad>8, quadcorrente);
                     }
                 }
             ;
 ElseStat	:   /* Empty */
-            |	ELSE        {
+            |	ELSE  {
                     tabular(); printf ("else ");
                     opndaux.tipo = ROTOPND;
                     $<quad>$ =
-                    GeraQuadrupla (OPJUMP, opndidle, opndidle, opndaux);
+                        GeraQuadrupla (OPJUMP, opndidle, opndidle, opndaux);
                 }
-                Statement {
+                Statement   {
                     $<quad>2->result.atr.rotulo =
                     GeraQuadrupla (NOP, opndidle, opndidle, opndidle);
                 }
             ;
-WhileStat   :	WHILE       {
-                    printf ("while ");
-                    GeraQuadrupla(NOP, opndidle, opndidle, opndidle);
-                }
+WhileStat   :	WHILE       {printf ("while ");}
                 Expression  {
                     if ($3.tipo != LOGICO)
                         Incompatibilidade ("Operando improprio para comando while");
                 }
                 DO          {printf (" do ");}
-                Statement {
-                    GeraQuadrupla(NOP, opndidle, opndidle, opndidle);
-                }
+                Statement
             ;
 RepeatStat  :	REPEAT      {printf ("repeat {\n"); tab++; tabular(); }
                 Statement
@@ -541,6 +531,7 @@ ForStat	    :	FOR         {printf ("for ");}
                     if ($7.tipo != INTEIRO)
                         Incompatibilidade ("Inicializacao impropria para cabecalho de comando for");
                     $3.simb->inic = $3.simb->ref = VERDADE;
+                    GeraQuadrupla (OPATRIB, $7.opnd, opndidle, $3.opnd);
                 }
                 WHILE       {printf (" while ");}
                 Expression  {
@@ -557,25 +548,23 @@ ForStat	    :	FOR         {printf ("for ");}
             ;
 ReadStat   	:   READ
                 OPPAR       {printf ("read "); printf ("\(");}
-                ReadList {
+                ReadList    {
                     opnd1.tipo = INTOPND;
                     opnd1.atr.valint = $4;
                     GeraQuadrupla (OPREAD, opnd1, opndidle, opndidle);
-                }
+                } 
                 CLPAR       {printf (")"); }
                 SCOLON      {printf (";\n");}
             ;
-ReadList	:   Variable    {
+ReadList    :   Variable  {
                     if  ($1.simb != NULL) $1.simb->inic = $1.simb->ref = VERDADE;
                     $$ = 1;
                     GeraQuadrupla (PARAM, $1.opnd, opndidle, opndidle);
                 }
-            |	ReadList
-                COMMA       {printf (", ");}
-                Variable {
+            |   ReadList  COMMA  {printf (", ");}  Variable  {
                     if  ($4.simb != NULL) $4.simb->inic = $4.simb->ref = VERDADE;
-                    $$ = $1 + 1;
-                    GeraQuadrupla (PARAM, $4.opnd, opndidle, opndidle);
+                        $$ = $1 + 1;
+                        GeraQuadrupla (PARAM, $4.opnd, opndidle, opndidle);
                 }
             ;
 WriteStat   :	WRITE
@@ -584,7 +573,7 @@ WriteStat   :	WRITE
                     opnd1.tipo = INTOPND;
                     opnd1.atr.valint = $4;
                     GeraQuadrupla (OPWRITE, opnd1, opndidle, opndidle);
-                }
+                } 
                 CLPAR       {printf (")"); }
                 SCOLON      {printf (";\n");}
             ;
@@ -637,10 +626,10 @@ ReturnStat  :	RETURN      {printf ("return");}
 AssignStat  :   Variable  {
                     if  ($1.simb != NULL) $1.simb->inic = $1.simb->ref = VERDADE;
                 }
-                ASSIGN  {printf (" = ");}  Expression
+                ASSIGN  {printf ("= ");}  Expression
                 SCOLON  {
                     printf (";\n");
-                    if ($1.simb != NULL) {
+                    if ($1.simb != NULL){
                         if ((($1.simb->tvar == INTEIRO || $1.simb->tvar == CARACTERE) &&
                             ($5.tipo == REAL || $5.tipo == LOGICO)) ||
                             ($1.simb->tvar == REAL && $5.tipo == LOGICO) ||
@@ -828,35 +817,35 @@ Factor      :   Variable  {
             |   FuncCall
             ;
 Variable    :   ID  {
-                    printf ("%s", $1);
+                    printf ("%s ", $1);
                     simb = ProcuraSimbParaUsar ($1, escopo);
-                    if (simb == NULL) NaoDeclarado ($1);
-                    else if (simb->tid != IDVAR) TipoInadequado ($1);
+                    if (simb == NULL)
+                        NaoDeclarado ($1);
+                    else if (simb->tid != IDVAR)
+                        TipoInadequado ($1);
                     $$.simb = simb;
-                    if ($$.simb != NULL) {
+                    if ($$.simb != NULL)
                         if ($$.simb->array == VERDADE)
                             Esperado ("Subscrito\(s)");
                         $$.opnd.tipo = VAROPND;
                         $$.opnd.atr.simb = $$.simb;
-                    }
                 }
-            |   ID
-                OPBRAK  {
-                    printf ("%s[", $1);
+            |   ID  OPBRAK  {
+                    printf ("%s [ ", $1);
                     simb = ProcuraSimbParaUsar ($1, escopo);
-                    if (simb == NULL) NaoDeclarado ($1);
-                    else if (simb->tid != IDVAR) TipoInadequado ($1);
+                    if (simb == NULL)
+                        NaoDeclarado ($1);
+                    else if (simb->tid != IDVAR)
+                        TipoInadequado ($1);
                     $<simb>$ = simb;
-                }
-                SubscrList
+                }  SubscrList
                 CLBRAK  {
-                printf ("]"); $$.simb = $<simb>3;
-                if ($$.simb != NULL)
+                    printf ("] "); $$.simb = $<simb>3;
+                    if ($$.simb != NULL)
                         if ($$.simb->array == FALSO)
                             NaoEsperado ("Subscrito\(s)");
                         else if ($$.simb->ndims != $4)
-                            Incompatibilidade 
-                        ("Numero de subscritos incompativel com declaracao");
+                            Incompatibilidade ("Numero de subscritos incompativel com declaracao");
                 }
             ;
 SubscrList  :   AuxExpr4  {
@@ -873,16 +862,13 @@ SubscrList  :   AuxExpr4  {
 FuncCall    :   ID  {
                     printf ("%s", $1);
                     simb = ProcuraSimbParaUsar ($1, escopo);
-                    if (simb == NULL)
-                        NaoDeclarado ($1);
-                    else if
-                        (simb->tid != IDFUNC) TipoInadequado ($1);
+                    if (simb == NULL) NaoDeclarado ($1);
+                    else if (simb->tid != IDFUNC) TipoInadequado ($1);
                     $<simb>$ = simb;
 		        }
                 OPPAR       {printf ("\(");}
                 FuncTerm {
                     $$.tipo = $<simb>2->tvar;
-                    /* $$.opnd.atr = $<simb>2; */
                 }
             ;
 FuncTerm    :   CLPAR                   {printf (")"); }
@@ -1111,7 +1097,7 @@ simbolo NovaTemp (int tip) {
     i --;
     for (j = 0; j <= i; j++)
         nometemp[2+i-j] = s[j];
-    simb = InsereSimb (nometemp, IDVAR, tip, escopo);
+    simb = InsereSimb (nometemp, IDVAR, tip, escopo); /* NOTE inserido escopo local */
     simb->inic = simb->ref = VERDADE;
     simb->array = FALSO;
     return simb;
@@ -1173,8 +1159,8 @@ void ImprimeQuadruplas () {
 
 void RenumQuadruplas (quadrupla quad1, quadrupla quad2) {
     quadrupla q; int nquad;
-    for (q = quad1->prox, nquad = quad1->num; q != quad2->prox; q = q->prox) {
-        nquad++;
+    for (q = quad1->prox, nquad = quad1->num; q != quad2; q = q->prox) {
+      nquad++;
         q->num = nquad;
     }
 }
