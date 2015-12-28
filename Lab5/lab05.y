@@ -235,7 +235,8 @@ struct infovariavel {
     simbolo simb;
     infoexpressao infoexpr;
     infovariavel infovar;
-    int nsubscr;    
+    int nsubscr;
+    quadrupla quad;
 }
 
 /* Declaracao dos atributos dos tokens e dos nao-terminais */
@@ -466,9 +467,15 @@ IfStat		:   IF          {printf ("if ");}
                 Expression  {
                     if ($3.tipo != LOGICO)
                         Incompatibilidade ("Operando improprio para comando if");
+                    opndaux.tipo = ROTOPND;
+                    $<quad>$ = 
+                        GeraQuadrupla (OPJF, $3.opnd, opndidle, opndaux);
                 }
                 THEN        {printf (" then ");}
-                Statement
+                Statement   {
+                    $<quad>4->result.atr.rotulo =
+                        GeraQuadrupla (NOP, opndidle, opndidle, opndidle);
+                }
                 ElseStat
             ;
 ElseStat	:   /* Empty */
