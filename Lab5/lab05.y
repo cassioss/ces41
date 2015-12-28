@@ -99,10 +99,10 @@ char *nometipvar[5] = {"NAOVAR",
 
 /* Strings para operadores de quadruplas */
 
-char *nomeoperquad[21] = {"",
+char *nomeoperquad[24] = {"",
     "OR", "AND", "LT", "LE", "GT", "GE", "EQ", "NE", "MAIS",
     "MENOS", "MULT", "DIV", "RESTO", "MENUN", "NOT", "ATRIB",
-    "OPENMOD", "NOP", "JUMP", "JF"
+    "OPENMOD", "NOP", "JUMP", "JF", "READ", "WRITE", "PARAM"
 };
 
 /*
@@ -531,6 +531,7 @@ ForStat	    :	FOR         {printf ("for ");}
                     if ($7.tipo != INTEIRO)
                         Incompatibilidade ("Inicializacao impropria para cabecalho de comando for");
                     $3.simb->inic = $3.simb->ref = VERDADE;
+                    GeraQuadrupla (OPATRIB, $7.opnd, opndidle, $3.opnd);
                 }
                 WHILE       {printf (" while ");}
                 Expression  {
