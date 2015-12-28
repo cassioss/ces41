@@ -64,6 +64,9 @@ int tab = 0; // NOTE bota num lugar melhor
 #define     NOP             18
 #define     OPJUMP          19
 #define     OPJF            20
+#define     OPREAD          21
+#define     OPWRITE         22
+#define     PARAM           23
 
 /* Definicao de constantes para os tipos de operandos de quadruplas */
 
@@ -187,7 +190,7 @@ struct celquad {
 
 struct celmodhead {
     simbolo modname; modhead prox;
-   int modtip;
+    int modtip;
     quadrupla listquad;
 };
 
@@ -235,7 +238,7 @@ struct infovariavel {
     simbolo simb;
     infoexpressao infoexpr;
     infovariavel infovar;
-    int nsubscr;
+    int nsubscr, nargs;
     quadrupla quad;
 }
 
@@ -270,8 +273,10 @@ struct infovariavel {
 
 %type   <infovar>   Variable
 %type   <infoexpr>  Expression  AuxExpr1  AuxExpr2
-                    AuxExpr3   AuxExpr4   Term   Factor FuncCall
+                    AuxExpr3    AuxExpr4   Term
+                    Factor    FuncCall   WriteElem
 %type   <nsubscr>   SubscrList
+%type   <nargs>     ReadList   WriteList
 %token  <string>    ID
 %token  <valor>     INTCT
 %token  <valreal>   FLOATCT
@@ -540,31 +545,54 @@ ForStat	    :	FOR         {printf ("for ");}
                 DO          {printf (" do ");}
                 Statement
             ;
-ReadStat   	:   READ        {printf ("read ");}
-                OPPAR       {printf ("\(");}
-                ReadList
+ReadStat   	:   READ
+                OPPAR       {printf ("read "); printf ("\(");}
+                ReadList    {
+                    opnd1.tipo = INTOPND;
+                    opnd1.atr.valint = $4;
+                    GeraQuadrupla (OPREAD, opnd1, opndidle, opndidle);
+                } 
                 CLPAR       {printf (")"); }
                 SCOLON      {printf (";\n");}
             ;
 ReadList    :   Variable  {
                     if  ($1.simb != NULL) $1.simb->inic = $1.simb->ref = VERDADE;
+                    $$ = 1;
+                    GeraQuadrupla (PARAM, $1.opnd, opndidle, opndidle);
                 }
             |   ReadList  COMMA  {printf (", ");}  Variable  {
                     if  ($4.simb != NULL) $4.simb->inic = $4.simb->ref = VERDADE;
+                        $$ = $1 + 1;
+                        GeraQuadrupla (PARAM, $4.opnd, opndidle, opndidle);
                 }
             ;
-WriteStat   :	WRITE       {printf ("write ");}
-                OPPAR       {printf ("\(");}
-                WriteList
+WriteStat   :	WRITE
+                OPPAR       {printf ("write "); printf ("\(");}
+                WriteList   {
+                    opnd1.tipo = INTOPND;
+                    opnd1.atr.valint = $4;
+                    GeraQuadrupla (OPWRITE, opnd1, opndidle, opndidle);
+                } 
                 CLPAR       {printf (")"); }
                 SCOLON      {printf (";\n");}
             ;
-WriteList	:	WriteElem
+WriteList	:	WriteElem   {
+                    $$ = 1;
+                    GeraQuadrupla (PARAM, $1.opnd, opndidle, opndidle);
+                }
             |	WriteList
                 COMMA       {printf (", "); }
-                WriteElem
+                WriteElem   {
+                    $$ = $1 + 1;
+                    GeraQuadrupla (PARAM, $4.opnd, opndidle, opndidle);
+                }
             ;
-WriteElem	:   STRING      {printf ("%s", $1);}
+WriteElem	:   STRING      {
+                    printf ("%s", $1);
+                    $$.opnd.tipo = CADOPND;
+                    $$.opnd.atr.valcad = malloc (strlen($1) + 1);
+                    strcpy ($$.opnd.atr.valcad, $1);
+                }
             |	Expression
             ;
 CallStat    :   CALL        {printf ("call ");}
@@ -600,12 +628,14 @@ AssignStat  :   Variable  {
                 ASSIGN  {printf ("= ");}  Expression
                 SCOLON  {
                     printf (";\n");
-                    if ($1.simb != NULL)
+                    if ($1.simb != NULL){
                         if ((($1.simb->tvar == INTEIRO || $1.simb->tvar == CARACTERE) &&
                             ($5.tipo == REAL || $5.tipo == LOGICO)) ||
                             ($1.simb->tvar == REAL && $5.tipo == LOGICO) ||
                             ($1.simb->tvar == LOGICO && $5.tipo != LOGICO))
                             Incompatibilidade ("Lado direito de comando de atribuicao improprio");
+                        GeraQuadrupla (OPATRIB, $5.opnd, opndidle, $1.opnd);
+                    }
                 }
             ;
 ExprList	:	Expression
@@ -618,6 +648,9 @@ Expression  :   AuxExpr1
                     if ($1.tipo != LOGICO || $4.tipo != LOGICO)
                         Incompatibilidade ("Operando improprio para operador or");
                     $$.tipo = LOGICO;
+                    $$.opnd.tipo = VAROPND;
+                    $$.opnd.atr.simb = NovaTemp ($$.tipo);
+                    GeraQuadrupla (OPOR, $1.opnd, $4.opnd, $$.opnd);
                 }
             ;
 AuxExpr1    :   AuxExpr2
@@ -625,6 +658,9 @@ AuxExpr1    :   AuxExpr2
                     if ($1.tipo != LOGICO || $4.tipo != LOGICO)
                         Incompatibilidade ("Operando improprio para operador and");
                     $$.tipo = LOGICO;
+                    $$.opnd.tipo = VAROPND;
+                    $$.opnd.atr.simb = NovaTemp ($$.tipo);
+                    GeraQuadrupla (OPAND, $1.opnd, $4.opnd, $$.opnd);
                 }
             ;
 AuxExpr2    :   AuxExpr3
@@ -632,6 +668,9 @@ AuxExpr2    :   AuxExpr3
                     if ($3.tipo != LOGICO)
                         Incompatibilidade ("Operando improprio para operador not");
                     $$.tipo = LOGICO;
+                    $$.opnd.tipo = VAROPND;
+                    $$.opnd.atr.simb = NovaTemp ($3.tipo);
+                    GeraQuadrupla (OPNOT, $3.opnd, opndidle, $$.opnd);
                 }
             ;
 AuxExpr3    :   AuxExpr4
@@ -656,6 +695,28 @@ AuxExpr3    :   AuxExpr4
                             break;
                     }
                     $$.tipo = LOGICO;
+                    $$.opnd.tipo = VAROPND;
+                    $$.opnd.atr.simb = NovaTemp ($$.tipo);
+                    switch ($2) {
+                        case LT:
+                            GeraQuadrupla (OPLT, $1.opnd, $4.opnd, $$.opnd);
+                            break;
+                        case LE:
+                            GeraQuadrupla (OPLE, $1.opnd, $4.opnd, $$.opnd);
+                            break;
+                        case GT:
+                            GeraQuadrupla (OPGT, $1.opnd, $4.opnd, $$.opnd);
+                            break;
+                        case GE:
+                            GeraQuadrupla (OPGE, $1.opnd, $4.opnd, $$.opnd);
+                            break;
+                        case EQ:
+                            GeraQuadrupla (OPEQ, $1.opnd, $4.opnd, $$.opnd);
+                            break;
+                        case NE:
+                            GeraQuadrupla (OPNE, $1.opnd, $4.opnd, $$.opnd);
+                            break;
+                    }
                 }
             ;
 AuxExpr4    :   Term
@@ -669,6 +730,11 @@ AuxExpr4    :   Term
                             Incompatibilidade ("Operando improprio para operador aritmetico");
                         if ($1.tipo == REAL || $4.tipo == REAL) $$.tipo = REAL;
                         else $$.tipo = INTEIRO;
+                        $$.opnd.tipo = VAROPND;
+                        $$.opnd.atr.simb = NovaTemp ($$.tipo);
+                        if ($2 == PLUS)
+                            GeraQuadrupla (OPMAIS, $1.opnd, $4.opnd, $$.opnd);
+                        else  GeraQuadrupla (OPMENOS, $1.opnd, $4.opnd, $$.opnd);
                 }
             ;
 Term        :   Factor
@@ -685,9 +751,9 @@ Term        :   Factor
                                 Incompatibilidade ("Operando improprio para operador aritmetico");
                             if ($1.tipo == REAL || $4.tipo == REAL) $$.tipo = REAL;
                             else $$.tipo = INTEIRO;
-                            $$.opnd.tipo = VAROPND;  
+                            $$.opnd.tipo = VAROPND;
                             $$.opnd.atr.simb = NovaTemp ($$.tipo);
-                            if ($2 == TIMES)  
+                            if ($2 == TIMES)
                                 GeraQuadrupla   (OPMULTIP, $1.opnd, $4.opnd, $$.opnd);
                             else  GeraQuadrupla  (OPDIV, $1.opnd, $4.opnd, $$.opnd);
                             break;
@@ -695,7 +761,7 @@ Term        :   Factor
                             if ($1.tipo != INTEIRO && $1.tipo != CARACTERE  ||  $4.tipo != INTEIRO && $4.tipo != CARACTERE)
                                 Incompatibilidade ("Operando improprio para operador resto");
                             $$.tipo = INTEIRO;
-                            $$.opnd.tipo = VAROPND;  
+                            $$.opnd.tipo = VAROPND;
                             $$.opnd.atr.simb = NovaTemp ($$.tipo);
                             GeraQuadrupla (OPRESTO, $1.opnd, $4.opnd, $$.opnd);
                             break;
@@ -705,26 +771,32 @@ Term        :   Factor
 Factor      :   Variable  {
                     if  ($1.simb != NULL)  {
                         $1.simb->ref  =  VERDADE;
-                        $$.tipo = $1.simb->tvar; $$.opnd = $1.opnd;
+                        $$.tipo = $1.simb->tvar;
+                        $$.opnd = $1.opnd;
                     }
                 }
-            |   INTCT  {printf ("%d ", $1); $$.tipo = INTEIRO;
+            |   INTCT  {
+                    printf ("%d ", $1); $$.tipo = INTEIRO;
                     $$.opnd.tipo = INTOPND;
                     $$.opnd.atr.valint = $1;
                 }
-            |   FLOATCT  {printf ("%g ", $1); $$.tipo = REAL;
+            |   FLOATCT  {
+                    printf ("%g ", $1); $$.tipo = REAL;
                     $$.opnd.tipo = REALOPND;
                     $$.opnd.atr.valfloat = $1;
                 }
-            |   CHARCT  {printf ("\'%c\' ", $1); $$.tipo = CARACTERE;
+            |   CHARCT  {
+                    printf ("\'%c\' ", $1); $$.tipo = CARACTERE;
                     $$.opnd.tipo = CHAROPND;
                     $$.opnd.atr.valchar = $1;
                 }
-            |   TRUE  {printf ("true "); $$.tipo = LOGICO;
+            |   TRUE  {
+                    printf ("true "); $$.tipo = LOGICO;
                     $$.opnd.tipo = LOGICOPND;
                     $$.opnd.atr.vallogic = 1;
                 }
-            |   FALSE  {printf ("false "); $$.tipo = LOGICO;
+            |   FALSE  {
+                    printf ("false "); $$.tipo = LOGICO;
                     $$.opnd.tipo = LOGICOPND;
                     $$.opnd.atr.vallogic = 0;
                 }
@@ -737,8 +809,9 @@ Factor      :   Variable  {
                     $$.opnd.atr.simb = NovaTemp ($$.tipo);
                     GeraQuadrupla  (OPMENUN, $3.opnd, opndidle, $$.opnd);
                 }
-            |   OPPAR   {printf ("( ");}  Expression  CLPAR
-                {printf (") "); $$.tipo = $3.tipo; $$.opnd = $3.opnd;
+            |   OPPAR   {printf ("( ");}  Expression  CLPAR {
+                    printf (") "); $$.tipo = $3.tipo;
+                    $$.opnd = $3.opnd;
                 }
             |   FuncCall
             ;
