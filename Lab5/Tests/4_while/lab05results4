@@ -1,0 +1,50 @@
+program MenorMaior {{{
+
+main
+local {
+	int i;
+}
+
+statements {
+	i = 1 ;
+	while i != 3  do {
+		if i == 2  then i = 3 ;
+		else i = 2 ;
+	}
+}
+
+}}}
+
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 4:
+  (##1, IDVAR, LOGICO, 1, 1, ##main)
+
+Classe 5:
+  (##2, IDVAR, LOGICO, 1, 1, ##main)
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)
+
+Classe 13:
+  (i, IDVAR, INTEIRO, 1, 1, ##main)
+
+
+Quadruplas do modulo ##global:
+
+	   1) OPENMOD, (MODULO, ##global), (IDLE), (IDLE)
+	   2) ATRIB, (INT, 1), (IDLE), (VAR, i)
+	   3) NE, (VAR, i), (INT, 3), (VAR, ##1)
+	   4) EQ, (VAR, i), (INT, 2), (VAR, ##2)
+	   5) JF, (VAR, ##2), (IDLE), (ROTULO, 8)
+	   6) ATRIB, (INT, 3), (IDLE), (VAR, i)
+	   7) JUMP, (IDLE), (IDLE), (ROTULO, 10)
+	   8) NOP, (IDLE), (IDLE), (IDLE)
+	   9) ATRIB, (INT, 2), (IDLE), (VAR, i)
+	  10) NOP, (IDLE), (IDLE), (IDLE)
+	  11) EXITOP, (IDLE), (IDLE), (IDLE)

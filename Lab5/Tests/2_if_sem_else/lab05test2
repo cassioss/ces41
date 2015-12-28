@@ -1,0 +1,13 @@
+program MenorMaior{{{
+
+main
+local {
+	int compara; logic achou;
+}
+
+statements {
+	compara = 0;
+	if compara == 0 then
+		achou = true;
+}
+}}}

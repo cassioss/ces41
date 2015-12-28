@@ -1,0 +1,34 @@
+program MenorMaior {{{
+
+main
+local {
+	int i;
+}
+
+statements {
+	i = 1 ;
+}
+
+}}}
+
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 5:
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)
+
+Classe 13:
+  (i, IDVAR, INTEIRO, 1, 1, ##main)
+
+
+Quadruplas do modulo ##global:
+
+	   1) OPENMOD, (MODULO, ##global), (IDLE), (IDLE)
+	   2) ATRIB, (INT, 1), (IDLE), (VAR, i)
+	   3) EXITOP, (IDLE), (IDLE), (IDLE)

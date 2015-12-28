@@ -1,0 +1,17 @@
+program MenorMaior{{{
+
+main
+local {
+	int i, j; logic fim;
+}
+
+statements {
+	j = 0;
+	fim = false;
+	for i init 0 while !fim new i+1 do {
+		j = j + 1;
+		if j > 3 then
+			fim = true;
+	}
+}
+}}}

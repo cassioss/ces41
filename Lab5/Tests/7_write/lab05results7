@@ -1,0 +1,37 @@
+program MenorMaior {{{
+
+main
+local {
+	char c;
+}
+
+statements {
+	write ("Nova palavra? (s/n): ");
+}
+
+}}}
+
+c: Nao Inicializada
+c: Nao Referenciada
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 5:
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 7:
+  (c, IDVAR, CARACTERE, 0, 0, ##main)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)
+
+
+Quadruplas do modulo ##global:
+
+	   1) OPENMOD, (MODULO, ##global), (IDLE), (IDLE)
+	   2) PARAM, (CADEIA, "Nova palavra? (s/n): "), (IDLE), (IDLE)
+	   3) WRITE, (INT, 1), (IDLE), (IDLE)
+	   4) EXITOP, (IDLE), (IDLE), (IDLE)

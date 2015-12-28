@@ -1,0 +1,16 @@
+program MenorMaior{{{
+
+main
+local {
+	int i;
+}
+
+statements {
+	i = 1;
+	while i != 3 do {
+    	if i == 2 then
+    		i = 3;
+    	else i = 2;
+    }
+}
+}}}
