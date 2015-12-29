@@ -1,0 +1,11 @@
+program MenorMaior{{{
+
+main
+local {
+	char c;
+}
+
+statements {
+	read(c);
+}
+}}}

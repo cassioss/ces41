@@ -1,0 +1,48 @@
+program MenorMaior {{{
+
+main
+local {
+	char c;
+}
+
+statements {
+	read (c );
+}
+
+}}}
+
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 5:
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 7:
+  (c, IDVAR, CARACTERE, 1, 1, ##main)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)
+
+
+Quadruplas do modulo ##global:
+
+	   1) OPENMOD, (MODULO, ##global), (IDLE), (IDLE)
+	   2) PARAM, (VAR, c), (IDLE), (IDLE)
+	   3) READ, (INT, 1), (IDLE), (IDLE)
+	   4) OPEXIT, (IDLE), (IDLE), (IDLE)
+
+
+INTERPRETADOR:
+
+   1) OPENMOD
+		Alocando as variaveis:
+			c: 1 elemento(s) alocado(s) 
+   2) PARAM
+   3) READ
+		Lendo: 
+
+   4) OPEXIT
+		Programa encerrado

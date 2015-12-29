@@ -1,0 +1,62 @@
+program MenorMaior {{{
+
+main
+local {
+	int compara;
+	logic achou;
+}
+
+statements {
+	compara = 0 ;
+	if compara == 0  then achou = true ;
+}
+
+}}}
+
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 3:
+  (compara, IDVAR, INTEIRO, 1, 1, ##main)
+
+Classe 4:
+  (##1, IDVAR, LOGICO, 1, 1, ##main)
+
+Classe 5:
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)
+
+Classe 22:
+  (achou, IDVAR, LOGICO, 1, 1, ##main)
+
+
+Quadruplas do modulo ##global:
+
+	   1) OPENMOD, (MODULO, ##global), (IDLE), (IDLE)
+	   2) ATRIB, (INT, 0), (IDLE), (VAR, compara)
+	   3) EQ, (VAR, compara), (INT, 0), (VAR, ##1)
+	   4) JF, (VAR, ##1), (IDLE), (ROTULO, 6)
+	   5) ATRIB, (LOGIC, 1), (IDLE), (VAR, achou)
+	   6) NOP, (IDLE), (IDLE), (IDLE)
+	   7) OPEXIT, (IDLE), (IDLE), (IDLE)
+
+
+INTERPRETADOR:
+
+   1) OPENMOD
+		Alocando as variaveis:
+			compara: 1 elemento(s) alocado(s) 
+			##1: 1 elemento(s) alocado(s) 
+			achou: 1 elemento(s) alocado(s) 
+   2) ATRIB
+		Foi atribuido o valor INTEIRO 0 para a variavel compara
+   3) EQ
+   4) JF
+   6) NOP
+   7) OPEXIT
+		Programa encerrado

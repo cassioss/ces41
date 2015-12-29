@@ -1,0 +1,12 @@
+program MenorMaior{{{
+
+main
+local {
+	int i;
+}
+
+statements {
+	i = 1;
+	write ("Nova palavra? (s/n): ");
+}
+}}}

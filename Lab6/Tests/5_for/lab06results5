@@ -1,0 +1,95 @@
+program MenorMaior {{{
+
+main
+local {
+	int i, j;
+	logic fim;
+}
+
+statements {
+	j = 0 ;
+	fim = false ;
+	for i  init 0  while ! fim  new i + 1  do {
+		j = j + 1 ;
+		if j > 3  then fim = true ;
+	}
+}
+
+}}}
+
+
+
+  =========================
+  = TABELA  DE  SIMBOLOS: =
+  =========================
+
+Classe 4:
+  (##1, IDVAR, LOGICO, 1, 1, ##main)
+
+Classe 5:
+  (##2, IDVAR, INTEIRO, 1, 1, ##main)
+  (##global, IDGLOB, NAOVAR, 0, 0)
+
+Classe 6:
+  (##3, IDVAR, INTEIRO, 1, 1, ##main)
+
+Classe 7:
+  (##4, IDVAR, LOGICO, 1, 1, ##main)
+
+Classe 8:
+  (##main, IDPROG, NAOVAR, 0, 0, ##global)
+
+Classe 13:
+  (i, IDVAR, INTEIRO, 1, 1, ##main)
+
+Classe 14:
+  (j, IDVAR, INTEIRO, 1, 1, ##main)
+
+Classe 17:
+  (fim, IDVAR, LOGICO, 1, 1, ##main)
+
+
+Quadruplas do modulo ##global:
+
+	   1) OPENMOD, (MODULO, ##global), (IDLE), (IDLE)
+	   2) ATRIB, (INT, 0), (IDLE), (VAR, j)
+	   3) ATRIB, (LOGIC, 0), (IDLE), (VAR, fim)
+	   4) ATRIB, (INT, 0), (IDLE), (VAR, i)
+	   5) NOT, (VAR, fim), (IDLE), (VAR, ##1)
+	   6) MAIS, (VAR, i), (INT, 1), (VAR, ##2)
+	   7) MAIS, (VAR, j), (INT, 1), (VAR, ##3)
+	   8) ATRIB, (VAR, ##3), (IDLE), (VAR, j)
+	   9) GT, (VAR, j), (INT, 3), (VAR, ##4)
+	  10) JF, (VAR, ##4), (IDLE), (ROTULO, 12)
+	  11) ATRIB, (LOGIC, 1), (IDLE), (VAR, fim)
+	  12) NOP, (IDLE), (IDLE), (IDLE)
+	  13) OPEXIT, (IDLE), (IDLE), (IDLE)
+
+
+INTERPRETADOR:
+
+   1) OPENMOD
+		Alocando as variaveis:
+			##1: 1 elemento(s) alocado(s) 
+			##2: 1 elemento(s) alocado(s) 
+			##3: 1 elemento(s) alocado(s) 
+			##4: 1 elemento(s) alocado(s) 
+			i: 1 elemento(s) alocado(s) 
+			j: 1 elemento(s) alocado(s) 
+			fim: 1 elemento(s) alocado(s) 
+   2) ATRIB
+		Foi atribuido o valor INTEIRO 0 para a variavel j
+   3) ATRIB
+		Foi atribuido o valor LOGICO 0 para a variavel fim
+   4) ATRIB
+		Foi atribuido o valor INTEIRO 0 para a variavel i
+   5) NOT
+   6) MAIS
+   7) MAIS
+   8) ATRIB
+		Foi atribuido o valor INTEIRO contido em ##3 para a variavel j
+   9) GT
+  10) JF
+  12) NOP
+  13) OPEXIT
+		Programa encerrado
